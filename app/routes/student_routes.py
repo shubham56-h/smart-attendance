@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Attendance, Student
 from app.routes.faculty_routes import otp_sessions, faculty_locations
+from app.utils import hash_password, verify_password
 from datetime import datetime, timezone
 import math, time
 
@@ -40,7 +41,7 @@ def register_student():
         division=data["division"],
         mobile_number=data["mobile_number"],
         email=data["email"],
-        password=data["password"],
+        password=hash_password(data["password"]),
     )
 
     db.session.add(student)
@@ -53,8 +54,8 @@ def register_student():
 @student_bp.route("/login", methods=["POST"])
 def login_student():
     data = request.get_json()
-    student = Student.query.filter_by(email=data["email"], password=data["password"]).first()
-    if student:
+    student = Student.query.filter_by(email=data["email"]).first()
+    if student and verify_password(student.password, data["password"]):
         return jsonify({"status": "success", "message": "Login successful", "student_id": student.id})
     else:
         return jsonify({"status": "error", "message": "Invalid credentials"}), 401

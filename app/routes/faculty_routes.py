@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Attendance, Faculty, Student
+from app.utils import verify_password
 from datetime import datetime, timezone, timedelta
 import random
 
@@ -19,9 +20,9 @@ def faculty_login():
     email = data.get('email')
     password = data.get('password')
 
-    faculty = Faculty.query.filter_by(email=email, password=password).first()
+    faculty = Faculty.query.filter_by(email=email).first()
 
-    if not faculty:
+    if not faculty or not verify_password(faculty.password, password):
         return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
 
     return jsonify({'status': 'success', 'message': 'Login successful', 'faculty_id': faculty.id})
