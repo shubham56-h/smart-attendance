@@ -2,7 +2,8 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Attendance, Student
 from app.routes.faculty_routes import otp_sessions, faculty_locations
-from app.utils import hash_password, verify_password
+from app.utils import hash_password, verify_password, generate_tokens
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jwt
 from datetime import datetime, timezone
 import math, time
 
@@ -56,44 +57,95 @@ def login_student():
     data = request.get_json()
     student = Student.query.filter_by(email=data["email"]).first()
     if student and verify_password(student.password, data["password"]):
-        return jsonify({"status": "success", "message": "Login successful", "student_id": student.id})
+        # Generate JWT tokens
+        access_token, refresh_token = generate_tokens(
+            identity=str(student.id),
+            additional_claims={"type": "student", "email": student.email}
+        )
+        return jsonify({
+            "status": "success",
+            "message": "Login successful",
+            "student_id": student.id,
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        })
     else:
         return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+
+# -------------------------------
+# 2.5️⃣ Refresh Token
+# -------------------------------
+@student_bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh_student_token():
+    current_user_id = get_jwt_identity()
+    claims = get_jwt()
+    
+    # Verify it's a student token
+    if claims.get("type") != "student":
+        return jsonify({"status": "error", "message": "Invalid token type"}), 401
+    
+    # Generate new access token
+    new_access_token = create_access_token(
+        identity=current_user_id,
+        additional_claims={"type": "student", "email": claims.get("email")}
+    )
+    
+    return jsonify({
+        "status": "success",
+        "access_token": new_access_token
+    })
 
 # -------------------------------
 # 3️⃣ Update student location
 # -------------------------------
 @student_bp.route("/update_location", methods=["POST"])
+@jwt_required()
 def update_student_location():
+    # Get student ID from JWT token
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    
+    # Verify it's a student token
+    if claims.get("type") != "student":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
     data = request.get_json()
-    student_id = data.get("student_id")
     lat = data.get("latitude")
     lon = data.get("longitude")
 
-    if not all([student_id, lat, lon]):
+    if not all([lat, lon]):
         return jsonify({"status": "error", "message": "Missing location data"}), 400
 
-    student_locations[student_id] = (lat, lon)
+    student_locations[current_user_id] = (lat, lon)
     return jsonify({"status": "success", "message": "Location updated successfully"})
 
 # -------------------------------
 # 4️⃣ Fill attendance
 # -------------------------------
 @student_bp.route("/fill_attendance", methods=["POST"])
+@jwt_required()
 def fill_attendance():
+    # Get student ID from JWT token
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    
+    # Verify it's a student token
+    if claims.get("type") != "student":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
     data = request.get_json()
-    student_id = data.get("student_id")
     faculty_id = data.get("faculty_id")
     otp = data.get("otp")
     subject = data.get("subject")
 
     # Validate presence of data
-    if not all([student_id, faculty_id, otp, subject]):
+    if not all([faculty_id, otp, subject]):
         return jsonify({"status": "error", "message": "Missing required data"}), 400
 
     # Convert to integers
     try:
-        student_id = int(student_id)
+        student_id = current_user_id  # Use authenticated student ID
         faculty_id = int(faculty_id)
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid ID format"}), 400

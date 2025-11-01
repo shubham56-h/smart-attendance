@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Attendance, Faculty, Student
-from app.utils import verify_password
+from app.utils import verify_password, generate_tokens
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, get_jwt
 from datetime import datetime, timezone, timedelta
 import random
 
@@ -25,16 +26,60 @@ def faculty_login():
     if not faculty or not verify_password(faculty.password, password):
         return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
 
-    return jsonify({'status': 'success', 'message': 'Login successful', 'faculty_id': faculty.id})
+    # Generate JWT tokens
+    access_token, refresh_token = generate_tokens(
+        identity=str(faculty.id),
+        additional_claims={"type": "faculty", "email": faculty.email}
+    )
+    
+    return jsonify({
+        'status': 'success',
+        'message': 'Login successful',
+        'faculty_id': faculty.id,
+        'access_token': access_token,
+        'refresh_token': refresh_token
+    })
+
+# -------------------------------
+# Faculty Refresh Token
+# -------------------------------
+@faculty_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh_faculty_token():
+    current_user_id = get_jwt_identity()
+    claims = get_jwt()
+    
+    # Verify it's a faculty token
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Invalid token type"}), 401
+    
+    # Generate new access token
+    new_access_token = create_access_token(
+        identity=current_user_id,
+        additional_claims={"type": "faculty", "email": claims.get("email")}
+    )
+    
+    return jsonify({
+        "status": "success",
+        "access_token": new_access_token
+    })
 
 
 # -------------------------------
 # Generate OTP
 # -------------------------------
 @faculty_bp.route('/generate_otp', methods=['POST'])
+@jwt_required()
 def generate_otp():
-    data = request.get_json()
-    faculty_id = data.get('faculty_id')
+    # Get faculty ID from JWT token
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    
+    # Verify it's a faculty token
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    faculty_id = current_user_id
 
     otp = str(random.randint(1000, 9999))
     expiry = datetime.now(timezone.utc) + timedelta(minutes=5)
@@ -52,16 +97,24 @@ def generate_otp():
 # Update Live Location
 # -------------------------------
 @faculty_bp.route('/update_location', methods=['POST'])
+@jwt_required()
 def update_location():
+    # Get faculty ID from JWT token
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    
+    # Verify it's a faculty token
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
     data = request.get_json()
-    faculty_id = data.get('faculty_id')
     latitude = data.get('latitude')
     longitude = data.get('longitude')
 
-    if not faculty_id or latitude is None or longitude is None:
-        return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+    if latitude is None or longitude is None:
+        return jsonify({'status': 'error', 'message': 'Missing location data'}), 400
 
-    faculty_locations[faculty_id] = (float(latitude), float(longitude))
+    faculty_locations[current_user_id] = (float(latitude), float(longitude))
 
     return jsonify({'status': 'success', 'message': 'Location updated successfully'})
 
@@ -69,8 +122,26 @@ def update_location():
 # 🧾 Route: View Attendance Reports
 # -----------------------------------------
 @faculty_bp.route("/view_reports", methods=["GET"])
+@jwt_required()
 def view_reports():
-    faculty_id = request.args.get("faculty_id")
+    # Get faculty ID from JWT token (optional: can filter by query param too)
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    
+    # Verify it's a faculty token
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    # Use authenticated faculty ID, but allow query param override for admin purposes
+    faculty_id_param = request.args.get("faculty_id")
+    if not faculty_id_param:
+        faculty_id = current_user_id
+    else:
+        try:
+            faculty_id = int(faculty_id_param)
+        except (ValueError, TypeError):
+            faculty_id = current_user_id
+    
     subject = request.args.get("subject")
     date = request.args.get("date")  # format: YYYY-MM-DD
     division = request.args.get("division")
