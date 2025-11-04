@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+	<h1 class="text-2xl font-bold mb-6">Student Dashboard</h1>
+	<div class="grid lg:grid-cols-2 gap-6">
+		<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+			<h2 class="font-semibold mb-3">Update Live Location</h2>
+			<button id="student-update-location" class="btn-secondary">Share Current Location</button>
+			<p id="student-location-msg" class="mt-2 text-sm"></p>
+		</div>
+		<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+			<h2 class="font-semibold mb-3">Fill Attendance</h2>
+			<form id="student-attendance" class="grid gap-3">
+				<select class="input" name="subject" required>
+					<option value="">Select Subject</option>
+					<option value="SSAE">SSAE</option>
+					<option value="WAD">WAD</option>
+					<option value="DAA">DAA</option>
+					<option value="DM">DM</option>
+				</select>
+				<input class="input" placeholder="OTP" name="otp" required>
+				<button class="btn-primary mt-2">Mark Present</button>
+			</form>
+			<p id="student-attendance-msg" class="mt-2 text-sm"></p>
+		</div>
+	</div>
+	<div class="mt-6">
+		<button id="student-logout" class="text-sm text-red-600">Logout</button>
+	</div>
+	<style>
+		.input{ @apply w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-primary/30; }
+		.btn-primary{ @apply inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-white hover:bg-blue-600 transition; }
+		.btn-secondary{ @apply inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-black transition; }
+	</style>
+{% endblock %}
+{% block scripts %}
+	<script src="/static/js/shared/api.js"></script>
+	<script src="/static/js/shared/auth.js"></script>
+	<script src="/static/js/student/dashboard.js"></script>
+{% endblock %}
+
+

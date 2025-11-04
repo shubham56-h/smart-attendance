@@ -61,4 +61,39 @@ def create_app():
     app.register_blueprint(faculty_bp, url_prefix="/faculty")
     app.register_blueprint(student_bp, url_prefix="/student")
 
+    # -------------------------------
+    # Frontend page routes
+    # -------------------------------
+    from flask import render_template, redirect
+
+    @app.route("/")
+    def home_page():
+        return render_template("index.html")
+
+    # Student pages
+    @app.route("/student/login")
+    def student_login_page():
+        return render_template("student/login.html")
+
+    @app.route("/student/register")
+    def student_register_page():
+        return render_template("student/register.html")
+
+    @app.route("/student/dashboard")
+    def student_dashboard_page():
+        return render_template("student/dashboard.html")
+
+    # Faculty pages
+    @app.route("/faculty/login")
+    def faculty_login_page():
+        return render_template("faculty/login.html")
+
+    @app.route("/faculty/dashboard")
+    def faculty_dashboard_page():
+        return render_template("faculty/dashboard.html")
+
+    @app.route("/faculty/take_attendance")
+    def faculty_take_attendance_page():
+        return render_template("faculty/take_attendance.html")
+
     return app

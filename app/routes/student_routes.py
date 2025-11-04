@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Attendance, Student
-from app.routes.faculty_routes import otp_sessions, faculty_locations
+from app.routes.faculty_routes import otp_sessions, faculty_locations, otp_to_faculty, otp_used_by_students
 from app.utils import hash_password, verify_password, generate_tokens
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jwt
 from datetime import datetime, timezone
@@ -135,13 +135,17 @@ def fill_attendance():
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
     
     data = request.get_json()
-    faculty_id = data.get("faculty_id")
     otp = data.get("otp")
     subject = data.get("subject")
 
     # Validate presence of data
-    if not all([faculty_id, otp, subject]):
-        return jsonify({"status": "error", "message": "Missing required data"}), 400
+    if not all([otp, subject]):
+        return jsonify({"status": "error", "message": "Missing required data (OTP and subject)"}), 400
+
+    # Get faculty_id from OTP lookup
+    faculty_id = otp_to_faculty.get(otp)
+    if not faculty_id:
+        return jsonify({"status": "error", "message": "Invalid OTP"}), 400
 
     # Convert to integers
     try:
@@ -158,6 +162,16 @@ def fill_attendance():
         return jsonify({"status": "error", "message": "Invalid OTP"}), 400
     if datetime.now(timezone.utc) > otp_info["expiry"]:
         return jsonify({"status": "error", "message": "OTP expired"}), 400
+    
+    # Validate that the subject matches the OTP's subject
+    otp_subject = otp_info.get("subject")
+    if otp_subject and otp_subject != subject:
+        return jsonify({"status": "error", "message": f"This OTP is for {otp_subject}, not {subject}"}), 400
+    
+    # Check if this student has already used this OTP for this subject
+    otp_usage_key = (otp, student_id, subject)
+    if otp_used_by_students.get(otp_usage_key):
+        return jsonify({"status": "error", "message": "You have already marked attendance"}), 400
 
     # Validate location range (<= 100 meters)
     faculty_loc = faculty_locations.get(faculty_id)
@@ -170,6 +184,17 @@ def fill_attendance():
     if distance > 100:
         return jsonify({"status": "error", "message": "Out of range"}), 403
 
+    # Check if student has already marked attendance for this subject today
+    today = datetime.now(timezone.utc).date()
+    existing_attendance = Attendance.query.filter_by(
+        student_id=student_id,
+        subject=subject,
+        date=today
+    ).first()
+    
+    if existing_attendance:
+        return jsonify({"status": "error", "message": "Attendance already marked for this subject today"}), 400
+
     # Wait 20 seconds before marking attendance
     time.sleep(10)
 
@@ -177,11 +202,14 @@ def fill_attendance():
     student_id=student_id,
     faculty_id=faculty_id,
     subject=subject,
-    date=datetime.now(timezone.utc).date(),
+    date=today,
     status="Present")
 
     db.session.add(attendance)
     db.session.commit()
+    
+    # Mark this OTP as used by this student
+    otp_used_by_students[otp_usage_key] = True
 
-    # For now just return a success message — later we’ll add Attendance table
+    # For now just return a success message — later we'll add Attendance table
     return jsonify({"status": "success", "message": f"Attendance marked for subject {subject}!"})

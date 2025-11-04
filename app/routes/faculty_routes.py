@@ -11,6 +11,8 @@ faculty_bp = Blueprint("faculty_bp", __name__)
 # Temporary storages
 otp_sessions = {}  # {faculty_id: {otp, expiry}}
 faculty_locations = {}  # {faculty_id: (lat, lon)}
+otp_to_faculty = {}  # {otp: faculty_id} - reverse lookup for OTP to faculty mapping
+otp_used_by_students = {}  # {(otp, student_id): True} - track which students have used which OTP
 
 # -------------------------------
 # Faculty Login
@@ -80,15 +82,35 @@ def generate_otp():
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
     
     faculty_id = current_user_id
+    
+    # Get subject from request body
+    data = request.get_json() or {}
+    subject = data.get("subject", "").strip()
+    
+    if not subject:
+        return jsonify({"status": "error", "message": "Subject is required to generate OTP"}), 400
 
     otp = str(random.randint(1000, 9999))
     expiry = datetime.now(timezone.utc) + timedelta(minutes=5)
 
-    otp_sessions[faculty_id] = {'otp': otp, 'expiry': expiry}
+    # Remove old OTP mapping if exists (in case of regeneration)
+    old_otp_info = otp_sessions.get(faculty_id)
+    if old_otp_info and 'otp' in old_otp_info:
+        old_otp = old_otp_info['otp']
+        otp_to_faculty.pop(old_otp, None)
+        # Clean up old OTP usage tracking - remove all entries for this OTP
+        keys_to_remove = [k for k in otp_used_by_students.keys() if k[0] == old_otp]
+        for key in keys_to_remove:
+            otp_used_by_students.pop(key, None)
+
+    # Store OTP with subject
+    otp_sessions[faculty_id] = {'otp': otp, 'expiry': expiry, 'subject': subject}
+    otp_to_faculty[otp] = faculty_id  # Store reverse lookup
 
     return jsonify({
         'status': 'success',
         'otp': otp,
+        'subject': subject,
         'expires_in': '5 minutes'
     })
 
@@ -163,10 +185,12 @@ def view_reports():
     report_data = []
     for record in records:
         student = Student.query.get(record.student_id)
+        faculty_name = record.faculty.full_name if record.faculty else "N/A"
         report_data.append({
             "student_name": student.full_name,
             "roll_number": student.roll_number,
             "division": student.division,
+            "faculty_name": faculty_name,
             "subject": record.subject,
             "date": record.date,
             "status": record.status
