@@ -33,8 +33,8 @@ def register_student():
         return jsonify({"status": "error", "message": "Missing fields"}), 400
 
     # Check if email already exists
-    if Student.query.filter_by(email=data["email"]).first():
-        return jsonify({"status": "error", "message": "Email already registered"}), 400
+    if Student.query.filter_by(roll_number=data["roll_number"]).first():
+        return jsonify({"status": "error", "message": "Student already registered"}), 400
 
     student = Student(
         full_name=data["full_name"],
@@ -55,7 +55,7 @@ def register_student():
 @student_bp.route("/login", methods=["POST"])
 def login_student():
     data = request.get_json()
-    student = Student.query.filter_by(email=data["email"]).first()
+    student = Student.query.filter_by(roll_number=data["roll_number"]).first()
     if student and verify_password(student.password, data["password"]):
         # Generate JWT tokens
         access_token, refresh_token = generate_tokens(
