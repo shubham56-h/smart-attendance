@@ -6,9 +6,13 @@ let locationUpdated = false;
 // Initialize state on page load
 window.addEventListener('DOMContentLoaded', ()=>{
 	const subjectInput = document.getElementById('subject-input');
+	const msg = document.getElementById('subject-msg');
 	const storedSubject = localStorage.getItem('current_subject');
 	if(storedSubject && subjectInput){
 		subjectInput.value = storedSubject;
+		SA.showMsg(msg, `Selected subject: ${storedSubject}`, true);
+	}else{
+		SA.showMsg(msg, 'No subject selected', false);
 	}
 });
 

@@ -47,13 +47,14 @@ document.getElementById('report-filters')?.addEventListener('submit', async (e)=
         if(countEl){ countEl.textContent = String(data.records.length || 0); }
 		for(const r of data.records){
 			const tr = document.createElement('tr');
-            tr.innerHTML = `<td class=\"py-2 pl-4 pr-4\">${r.student_name}</td>
+			tr.innerHTML = `<td class=\"py-2 pl-4 pr-4\">${r.student_name}</td>
 			<td class=\"py-2 pr-4\">${r.roll_number}</td>
 			<td class=\"py-2 pr-4\">${r.division}</td>
 			<td class=\"py-2 pr-4\">${r.faculty_name || 'N/A'}</td>
 			<td class=\"py-2 pr-4\">${r.subject}</td>
 			<td class=\"py-2 pr-4\">${r.date}</td>
-			<td class=\"py-2 pr-4\">${r.status}</td>`;
+			<td class=\"py-2 pr-4\">${r.status}</td>
+			<td class=\"py-2 pr-4\"><button class=\"btn-secondary text-xs\" data-action=\"delete-attendance\" data-id=\"${r.id}\">Mark Absent</button></td>`;
 			tableBody.appendChild(tr);
 		}
         if((data.records || []).length === 0){ emptyEl?.classList.remove('hidden'); }
@@ -61,7 +62,7 @@ document.getElementById('report-filters')?.addEventListener('submit', async (e)=
         lastReportRecords = [];
         if(countEl){ countEl.textContent = '0'; }
 		const tr = document.createElement('tr');
-        tr.innerHTML = `<td class=\"py-2 pl-4 pr-4 text-red-600\" colspan=\"7\">${data.message || 'No records or failed to load'}</td>`;
+		tr.innerHTML = `<td class=\"py-2 pl-4 pr-4 text-red-600\" colspan=\"8\">${data.message || 'No records or failed to load'}</td>`;
 		tableBody.appendChild(tr);
 	}
 });
@@ -150,5 +151,25 @@ document.getElementById('report-download-excel')?.addEventListener('click', ()=>
         }
     }catch(err){ /* ignore populate errors */ }
 })();
+
+// Handle delete (Mark Absent) with confirmation via event delegation
+document.getElementById('report-rows')?.addEventListener('click', async (e)=>{
+    const target = e.target;
+    if(!(target instanceof HTMLElement)) return;
+    if(target.dataset.action !== 'delete-attendance') return;
+    const id = target.dataset.id;
+    if(!id) return;
+    const ok = window.confirm('Are you sure you want to mark this record as Absent? This will delete it.');
+    if(!ok) return;
+    target.disabled = true;
+    try{
+        const res = await SA.apiFetch('faculty', `/faculty/attendance/${id}`, { method: 'DELETE', auth: true });
+        const data = await res.json();
+        if(!res.ok){ alert(data.message || 'Failed to delete record'); return; }
+        // reload current results by programmatically re-submitting the filters form
+        document.getElementById('report-filters')?.dispatchEvent(new Event('submit', { cancelable: true }));
+    }catch(err){ alert('Network error'); }
+    finally{ target.disabled = false; }
+});
 
 

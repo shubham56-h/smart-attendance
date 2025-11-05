@@ -195,8 +195,8 @@ def fill_attendance():
     if existing_attendance:
         return jsonify({"status": "error", "message": "Attendance already marked for this subject today"}), 400
 
-    # Wait 20 seconds before marking attendance
-    time.sleep(10)
+    # Mark OTP as used immediately to prevent duplicate concurrent submissions
+    otp_used_by_students[otp_usage_key] = True
 
     attendance = Attendance(
     student_id=student_id,
@@ -207,9 +207,6 @@ def fill_attendance():
 
     db.session.add(attendance)
     db.session.commit()
-    
-    # Mark this OTP as used by this student
-    otp_used_by_students[otp_usage_key] = True
 
     # For now just return a success message — later we'll add Attendance table
     return jsonify({"status": "success", "message": f"Attendance marked for subject {subject}!"})

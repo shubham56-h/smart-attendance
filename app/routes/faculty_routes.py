@@ -212,6 +212,7 @@ def view_reports():
         student = Student.query.get(record.student_id)
         faculty_name = record.faculty.full_name if record.faculty else "N/A"
         report_data.append({
+            "id": record.id,
             "student_name": student.full_name,
             "roll_number": student.roll_number,
             "division": student.division,
@@ -226,3 +227,26 @@ def view_reports():
         "count": len(report_data),
         "records": report_data
     })
+
+# -----------------------------------------
+# 🧹 Route: Delete Attendance (Mark Absent)
+# -----------------------------------------
+@faculty_bp.route("/attendance/<int:attendance_id>", methods=["DELETE"])
+@jwt_required()
+def delete_attendance(attendance_id: int):
+    claims = get_jwt()
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+
+    record = Attendance.query.get(attendance_id)
+    if not record:
+        return jsonify({"status": "error", "message": "Record not found"}), 404
+
+    # Optional: restrict deletion to the same faculty who marked it
+    # current_user_id = int(get_jwt_identity())
+    # if record.faculty_id and record.faculty_id != current_user_id:
+    #     return jsonify({"status": "error", "message": "Forbidden"}), 403
+
+    db.session.delete(record)
+    db.session.commit()
+    return jsonify({"status": "success", "message": "Attendance marked absent (deleted)."})

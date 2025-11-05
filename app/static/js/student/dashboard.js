@@ -12,17 +12,27 @@ document.getElementById('student-update-location')?.addEventListener('click', as
 	}catch(err){ SA.showMsg(msg, 'Location permission denied or error', false); }
 });
 
+let markPresentInFlight = false;
 document.getElementById('student-attendance')?.addEventListener('submit', async (e)=>{
-	e.preventDefault();
-	const form = e.target;
-	const msg = document.getElementById('student-attendance-msg');
-	const body = Object.fromEntries(new FormData(form).entries());
-	try{
-		const res = await SA.apiFetch('student', '/student/fill_attendance', { method: 'POST', body, auth: true });
-		const data = await res.json();
-		SA.showMsg(msg, data.message || (res.ok ? 'Marked present' : 'Failed'), res.ok);
-		if(res.ok){ form.reset(); }
-	}catch(err){ SA.showMsg(msg, 'Network error', false); }
+    e.preventDefault();
+    if(markPresentInFlight){ return; }
+    markPresentInFlight = true;
+    const form = e.target;
+    const submitBtn = form.querySelector('button');
+    const prevDisabled = submitBtn?.disabled;
+    if(submitBtn){ submitBtn.disabled = true; }
+    const msg = document.getElementById('student-attendance-msg');
+    const body = Object.fromEntries(new FormData(form).entries());
+    try{
+        const res = await SA.apiFetch('student', '/student/fill_attendance', { method: 'POST', body, auth: true });
+        const data = await res.json();
+        SA.showMsg(msg, data.message || (res.ok ? 'Marked present' : 'Failed'), res.ok);
+        if(res.ok){ form.reset(); }
+    }catch(err){ SA.showMsg(msg, 'Network error', false); }
+    finally{
+        markPresentInFlight = false;
+        if(submitBtn){ submitBtn.disabled = prevDisabled || false; }
+    }
 });
 
 
