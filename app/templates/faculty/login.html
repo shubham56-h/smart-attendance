@@ -10,8 +10,10 @@
 		<p id="faculty-login-msg" class="mt-2 text-sm"></p>
 	</div>
 	<style>
-		.input{ @apply w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-primary/30; }
-		.btn-primary{ @apply inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-white hover:bg-blue-600 transition; }
+		.input{ width:100%; border-radius:0.5rem; border:1px solid #cbd5e1; padding:0.5rem 0.75rem; outline:none; }
+		.input:focus{ box-shadow:0 0 0 3px rgba(37,99,235,0.3); }
+		.btn-primary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#2563eb; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
+		.btn-primary:hover{ background:#1d4ed8; }
 	</style>
 {% endblock %}
 {% block scripts %}

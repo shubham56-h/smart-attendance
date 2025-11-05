@@ -141,6 +141,28 @@ def update_location():
     return jsonify({'status': 'success', 'message': 'Location updated successfully'})
 
 # -----------------------------------------
+# 📋 Route: List Faculty (for dropdowns)
+# -----------------------------------------
+@faculty_bp.route('/list', methods=['GET'])
+@jwt_required()
+def list_faculty():
+    claims = get_jwt()
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+
+    # Optional name filter for typeahead clients
+    name_q = (request.args.get('q') or '').strip()
+    query = Faculty.query
+    if name_q:
+        query = query.filter(Faculty.full_name.ilike(f"%{name_q}%"))
+
+    faculty_list = [
+        {"id": f.id, "full_name": f.full_name}
+        for f in query.order_by(Faculty.full_name.asc()).all()
+    ]
+    return jsonify({"status": "success", "count": len(faculty_list), "faculty": faculty_list})
+
+# -----------------------------------------
 # 🧾 Route: View Attendance Reports
 # -----------------------------------------
 @faculty_bp.route("/view_reports", methods=["GET"])
@@ -154,24 +176,24 @@ def view_reports():
     if claims.get("type") != "faculty":
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
     
-    # Use authenticated faculty ID, but allow query param override for admin purposes
+    # Allow viewing all faculty by default; optionally filter by faculty_id or faculty_name
+    faculty_id = None
     faculty_id_param = request.args.get("faculty_id")
-    if not faculty_id_param:
-        faculty_id = current_user_id
-    else:
+    if faculty_id_param:
         try:
             faculty_id = int(faculty_id_param)
         except (ValueError, TypeError):
-            faculty_id = current_user_id
-    
+            faculty_id = None
+
     subject = request.args.get("subject")
     date = request.args.get("date")  # format: YYYY-MM-DD
     division = request.args.get("division")
+    faculty_name = request.args.get("faculty_name")
 
     query = Attendance.query
 
     # Optional filters
-    if faculty_id:
+    if faculty_id is not None:
         query = query.filter_by(faculty_id=faculty_id)
     if subject:
         query = query.filter_by(subject=subject)
@@ -179,6 +201,9 @@ def view_reports():
         query = query.filter(Attendance.date.like(f"%{date}%"))
     if division:
         query = query.join(Student).filter(Student.division == division)
+    if faculty_name:
+        # Ensure join to Faculty for name-based filtering
+        query = query.join(Faculty, Attendance.faculty).filter(Faculty.full_name.ilike(f"%{faculty_name}%"))
 
     records = query.all()
 
@@ -192,7 +217,7 @@ def view_reports():
             "division": student.division,
             "faculty_name": faculty_name,
             "subject": record.subject,
-            "date": record.date,
+            "date": record.date.isoformat() if record.date else None,
             "status": record.status
         })
 

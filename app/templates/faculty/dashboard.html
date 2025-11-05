@@ -1,33 +1,73 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1 class="text-2xl font-bold mb-6">Faculty Dashboard</h1>
-    <div class="grid md:grid-cols-2 gap-6">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">Faculty Dashboard</h1>
+        <p class="text-slate-600 mt-1">Manage classes, generate OTPs, and view attendance analytics.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
         <a href="/faculty/take_attendance" class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow transition">
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold">Take Attendance</h2>
-                <div class="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center group-hover:bg-primary group-hover:text-white">A</div>
+                <div>
+                    <h2 class="text-xl font-semibold">Take Attendance</h2>
+                    <p class="mt-1 text-slate-600 text-sm">Select subject, share location, generate OTP.</p>
+                </div>
+                <div class="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 grid place-items-center group-hover:bg-blue-600 group-hover:text-white transition">A</div>
             </div>
-            <p class="mt-2 text-slate-600 text-sm">Choose subject, update location, generate OTP.</p>
         </a>
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="font-semibold mb-3">Attendance Reports</h2>
-            <form id="report-filters" class="grid md:grid-cols-4 gap-3">
-                <select class="input" name="subject">
-                    <option value="">All Subjects</option>
-                    <option value="SSAE">SSAE</option>
-                    <option value="WAD">WAD</option>
-                    <option value="DAA">DAA</option>
-                    <option value="DM">DM</option>
-                </select>
-                <input class="input" placeholder="Date YYYY-MM-DD (optional)" name="date">
-                <input class="input" placeholder="Division (optional)" name="division">
-                <button class="btn-secondary">Load</button>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <h2 class="font-semibold">Attendance Reports</h2>
+                <div class="flex items-center gap-3">
+                    <div class="text-sm text-slate-500">Results: <span id="report-count">0</span></div>
+                    <div class="flex items-center gap-2">
+                        <button id="report-download-csv" class="btn-primary" type="button">Download CSV</button>
+                        <button id="report-download-excel" class="btn-primary" type="button">Download Excel</button>
+                    </div>
+                </div>
+            </div>
+
+            <form id="report-filters" class="mt-4 grid lg:grid-cols-5 gap-3">
+                <label class="block">
+                    <span class="block text-xs text-slate-500 mb-1">Subject</span>
+                    <select class="input" name="subject">
+                        <option value="">All Subjects</option>
+                        <option value="SSAE">SSAE</option>
+                        <option value="WAD">WAD</option>
+                        <option value="DAA">DAA</option>
+                        <option value="DM">DM</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="block text-xs text-slate-500 mb-1">Date</span>
+                    <input class="input" type="date" name="date">
+                </label>
+                <label class="block">
+                    <span class="block text-xs text-slate-500 mb-1">Division</span>
+                    <select class="input" name="division">
+                        <option value="">All Divisions</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="block text-xs text-slate-500 mb-1">Faculty</span>
+                    <select class="input" name="faculty_id" id="report-faculty-select">
+                        <option value="">All Faculty</option>
+                    </select>
+                </label>
+                <div class="flex items-end">
+                    <button id="report-load" class="btn-secondary w-full">Load</button>
+                </div>
             </form>
-            <div class="overflow-x-auto mt-4">
+
+            <div id="report-table-wrapper" class="overflow-x-auto mt-4 rounded-xl border border-slate-200">
                 <table class="min-w-full text-sm">
-                    <thead>
+                    <thead class="bg-slate-50">
                         <tr class="text-left text-slate-600">
-                            <th class="py-2 pr-4">Student</th>
+                            <th class="py-2 pl-4 pr-4">Student</th>
                             <th class="py-2 pr-4">Roll</th>
                             <th class="py-2 pr-4">Division</th>
                             <th class="py-2 pr-4">Faculty</th>
@@ -39,15 +79,22 @@
                     <tbody id="report-rows"></tbody>
                 </table>
             </div>
+
+            <div id="report-empty" class="hidden mt-4 text-center text-slate-500 text-sm">No records. Adjust filters and try again.</div>
         </div>
     </div>
-	<div class="mt-6">
-		<button id="faculty-logout" class="text-sm text-red-600">Logout</button>
-	</div>
+
+    <div class="mt-6 flex items-center justify-between">
+        <div class="text-xs text-slate-500">Tip: Use filters to quickly find specific classes or dates.</div>
+        <button id="faculty-logout" class="text-sm text-red-600">Logout</button>
+    </div>
 	<style>
-		.input{ @apply w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-primary/30; }
-		.btn-primary{ @apply inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-white hover:bg-blue-600 transition; }
-		.btn-secondary{ @apply inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-black transition; }
+		.input{ width:100%; border-radius:0.5rem; border:1px solid #cbd5e1; padding:0.5rem 0.75rem; outline:none; }
+		.input:focus{ box-shadow:0 0 0 3px rgba(37,99,235,0.3); }
+		.btn-primary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#2563eb; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
+		.btn-primary:hover{ background:#1d4ed8; }
+		.btn-secondary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#0f172a; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
+		.btn-secondary:hover{ background:#000; }
 	</style>
 {% endblock %}
 {% block scripts %}
