@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">Attendance Reports</h1>
+        <p class="text-slate-600 mt-1">Quickly browse, sort, filter, and download attendance records.</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+                <div class="text-sm text-slate-500">Results: <span id="report-count">0</span></div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="report-download-csv" class="btn-primary" type="button">Download CSV</button>
+                <button id="report-download-excel" class="btn-primary" type="button">Download Excel</button>
+            </div>
+        </div>
+
+        <form id="report-filters" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Subject</span>
+                <select class="input" name="subject">
+                    <option value="">All Subjects</option>
+                    <option value="SSAE">SSAE</option>
+                    <option value="WAD">WAD</option>
+                    <option value="DAA">DAA</option>
+                    <option value="DM">DM</option>
+                </select>
+            </label>
+
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Division</span>
+                <select class="input" name="division">
+                    <option value="">All Divisions</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+            </label>
+
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Faculty</span>
+                <select class="input" name="faculty_id" id="report-faculty-select">
+                    <option value="">All Faculty</option>
+                </select>
+            </label>
+
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Status</span>
+                <select class="input" name="status" id="report-status">
+                    <option value="">All</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                </select>
+            </label>
+
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Start Date</span>
+                <input class="input" type="date" name="start_date" id="report-start-date">
+            </label>
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">End Date</span>
+                <input class="input" type="date" name="end_date" id="report-end-date">
+            </label>
+            <div class="flex items-end gap-2 lg:col-span-2 flex-wrap">
+                <button type="button" class="btn-secondary" id="preset-today">Today</button>
+                <button type="button" class="btn-secondary" id="preset-week">This Week</button>
+                <button type="button" class="btn-secondary" id="preset-month">This Month</button>
+                <button type="button" class="btn-secondary" id="preset-reset">Reset All</button>
+            </div>
+
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Page Size</span>
+                <select class="input" name="size" id="report-page-size">
+                    <option value="10">10</option>
+                    <option value="15" selected>15</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </label>
+
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Sort By</span>
+                <select class="input" name="sort" id="report-sort">
+                    <option value="date" selected>Date</option>
+                    <option value="student">Student</option>
+                    <option value="roll">Roll</option>
+                    <option value="division">Division</option>
+                    <option value="subject">Subject</option>
+                    <option value="status">Status</option>
+                </select>
+            </label>
+
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Order</span>
+                <select class="input" name="order" id="report-order">
+                    <option value="desc" selected>Desc</option>
+                    <option value="asc">Asc</option>
+                </select>
+            </label>
+
+            <div class="flex items-end lg:col-span-1">
+                <button id="report-load" class="btn-secondary w-full">Load</button>
+            </div>
+            <input type="hidden" name="page" id="report-page" value="1">
+        </form>
+
+        <div id="report-table-wrapper" class="overflow-x-auto mt-4 rounded-xl border border-slate-200">
+            <table class="min-w-full text-sm">
+                <thead class="bg-slate-50">
+                    <tr class="text-left text-slate-600">
+                        <th class="py-2 pl-4 pr-4">Student</th>
+                        <th class="py-2 pr-4">Roll</th>
+                        <th class="py-2 pr-4">Division</th>
+                        <th class="py-2 pr-4">Faculty</th>
+                        <th class="py-2 pr-4">Subject</th>
+                        <th class="py-2 pr-4">Date</th>
+                        <th class="py-2 pr-4">Status</th>
+                        <th class="py-2 pr-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="report-rows"></tbody>
+            </table>
+        </div>
+
+        <div id="report-empty" class="hidden mt-4 text-center text-slate-500 text-sm">No records. Adjust filters and try again.</div>
+
+        <div class="mt-4 flex items-center justify-between">
+            <div class="text-sm text-slate-600" id="report-page-info">&nbsp;</div>
+            <div class="flex items-center gap-2">
+                <button type="button" id="report-page-prev" class="btn-secondary" disabled>Prev</button>
+                <button type="button" id="report-page-next" class="btn-secondary" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex items-center justify-between">
+        <div class="text-xs text-slate-500">Tip: Use presets for quick date ranges, or set custom start/end.</div>
+        <a href="/faculty/dashboard" class="text-sm text-slate-600">Back to dashboard</a>
+    </div>
+    <style>
+        .input{ width:100%; border-radius:0.5rem; border:1px solid #cbd5e1; padding:0.5rem 0.75rem; outline:none; }
+        .input:focus{ box-shadow:0 0 0 3px rgba(37,99,235,0.3); }
+        .btn-primary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#2563eb; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
+        .btn-primary:hover{ background:#1d4ed8; }
+        .btn-secondary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#0f172a; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
+        .btn-secondary:hover{ background:#000; }
+    </style>
+{% endblock %}
+{% block scripts %}
+    <script src="/static/js/shared/api.js"></script>
+    <script src="/static/js/shared/auth.js"></script>
+    <script src="/static/js/faculty/reports.js"></script>
+{% endblock %}
+
+

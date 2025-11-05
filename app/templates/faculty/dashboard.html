@@ -15,74 +15,15 @@
                 <div class="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 grid place-items-center group-hover:bg-blue-600 group-hover:text-white transition">A</div>
             </div>
         </a>
-
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-center justify-between flex-wrap gap-3">
-                <h2 class="font-semibold">Attendance Reports</h2>
-                <div class="flex items-center gap-3">
-                    <div class="text-sm text-slate-500">Results: <span id="report-count">0</span></div>
-                    <div class="flex items-center gap-2">
-                        <button id="report-download-csv" class="btn-primary" type="button">Download CSV</button>
-                        <button id="report-download-excel" class="btn-primary" type="button">Download Excel</button>
-                    </div>
+        <a href="/faculty/reports" class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold">View Reports</h2>
+                    <p class="mt-1 text-slate-600 text-sm">Quickly browse, sort, and download attendance reports.</p>
                 </div>
+                <div class="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center group-hover:bg-emerald-600 group-hover:text-white transition">R</div>
             </div>
-
-            <form id="report-filters" class="mt-4 grid lg:grid-cols-5 gap-3">
-                <label class="block">
-                    <span class="block text-xs text-slate-500 mb-1">Subject</span>
-                    <select class="input" name="subject">
-                        <option value="">All Subjects</option>
-                        <option value="SSAE">SSAE</option>
-                        <option value="WAD">WAD</option>
-                        <option value="DAA">DAA</option>
-                        <option value="DM">DM</option>
-                    </select>
-                </label>
-                <label class="block">
-                    <span class="block text-xs text-slate-500 mb-1">Date</span>
-                    <input class="input" type="date" name="date">
-                </label>
-                <label class="block">
-                    <span class="block text-xs text-slate-500 mb-1">Division</span>
-                    <select class="input" name="division">
-                        <option value="">All Divisions</option>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                    </select>
-                </label>
-                <label class="block">
-                    <span class="block text-xs text-slate-500 mb-1">Faculty</span>
-                    <select class="input" name="faculty_id" id="report-faculty-select">
-                        <option value="">All Faculty</option>
-                    </select>
-                </label>
-                <div class="flex items-end">
-                    <button id="report-load" class="btn-secondary w-full">Load</button>
-                </div>
-            </form>
-
-            <div id="report-table-wrapper" class="overflow-x-auto mt-4 rounded-xl border border-slate-200">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-slate-50">
-                        <tr class="text-left text-slate-600">
-                            <th class="py-2 pl-4 pr-4">Student</th>
-                            <th class="py-2 pr-4">Roll</th>
-                            <th class="py-2 pr-4">Division</th>
-                            <th class="py-2 pr-4">Faculty</th>
-                            <th class="py-2 pr-4">Subject</th>
-                            <th class="py-2 pr-4">Date</th>
-                            <th class="py-2 pr-4">Status</th>
-                            <th class="py-2 pr-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="report-rows"></tbody>
-                </table>
-            </div>
-
-            <div id="report-empty" class="hidden mt-4 text-center text-slate-500 text-sm">No records. Adjust filters and try again.</div>
-        </div>
+        </a>
     </div>
 
     <div class="mt-6 flex items-center justify-between">

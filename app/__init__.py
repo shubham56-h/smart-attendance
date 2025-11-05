@@ -96,4 +96,8 @@ def create_app():
     def faculty_take_attendance_page():
         return render_template("faculty/take_attendance.html")
 
+    @app.route("/faculty/reports")
+    def faculty_reports_page():
+        return render_template("faculty/reports.html")
+
     return app

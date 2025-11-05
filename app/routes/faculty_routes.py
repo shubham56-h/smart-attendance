@@ -3,7 +3,9 @@ from app import db
 from app.models import Attendance, Faculty, Student
 from app.utils import verify_password, generate_tokens
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, get_jwt
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, time, date as date_cls
+import io
+import csv
 import random
 
 faculty_bp = Blueprint("faculty_bp", __name__)
@@ -186,9 +188,25 @@ def view_reports():
             faculty_id = None
 
     subject = request.args.get("subject")
-    date = request.args.get("date")  # format: YYYY-MM-DD
+    date = request.args.get("date")  # legacy single date filter
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
     division = request.args.get("division")
     faculty_name = request.args.get("faculty_name")
+    status = request.args.get("status")
+
+    # Pagination & sorting
+    try:
+        page = int(request.args.get("page", 1))
+    except (TypeError, ValueError):
+        page = 1
+    try:
+        size = int(request.args.get("size", 15))
+    except (TypeError, ValueError):
+        size = 15
+    size = max(1, min(size, 100))  # guardrails
+    sort = (request.args.get("sort") or "date").strip().lower()
+    order = (request.args.get("order") or "desc").strip().lower()
 
     query = Attendance.query
 
@@ -197,18 +215,56 @@ def view_reports():
         query = query.filter_by(faculty_id=faculty_id)
     if subject:
         query = query.filter_by(subject=subject)
-    if date:
+    if start_date and end_date:
+        try:
+            # Attendance.date is a DATE column; compare using date objects inclusively
+            sd = date_cls.fromisoformat(start_date)
+            ed = date_cls.fromisoformat(end_date)
+            query = query.filter(Attendance.date >= sd, Attendance.date <= ed)
+        except ValueError:
+            # fallback to legacy date filtering when invalid
+            if date:
+                query = query.filter(Attendance.date.like(f"%{date}%"))
+    elif date:
         query = query.filter(Attendance.date.like(f"%{date}%"))
     if division:
         query = query.join(Student).filter(Student.division == division)
     if faculty_name:
         # Ensure join to Faculty for name-based filtering
         query = query.join(Faculty, Attendance.faculty).filter(Faculty.full_name.ilike(f"%{faculty_name}%"))
+    if status:
+        query = query.filter(Attendance.status == status)
 
-    records = query.all()
+    # Sorting
+    if sort == "student":
+        query = query.join(Student, Attendance.student_id == Student.id)
+        sort_col = Student.full_name
+    elif sort == "subject":
+        sort_col = Attendance.subject
+    elif sort == "division":
+        query = query.join(Student, Attendance.student_id == Student.id)
+        sort_col = Student.division
+    elif sort == "roll":
+        query = query.join(Student, Attendance.student_id == Student.id)
+        sort_col = Student.roll_number
+    elif sort == "status":
+        sort_col = Attendance.status
+    else:  # default: date
+        sort_col = Attendance.date
+
+    if order == "asc":
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    # Total before pagination
+    total = query.count()
+
+    # Pagination
+    items = query.offset((page - 1) * size).limit(size).all()
 
     report_data = []
-    for record in records:
+    for record in items:
         student = Student.query.get(record.student_id)
         faculty_name = record.faculty.full_name if record.faculty else "N/A"
         report_data.append({
@@ -225,8 +281,132 @@ def view_reports():
     return jsonify({
         "status": "success",
         "count": len(report_data),
+        "total": total,
+        "page": page,
+        "size": size,
         "records": report_data
     })
+
+# -----------------------------------------
+# 📤 Route: Export Attendance Reports (All Filtered Rows)
+# -----------------------------------------
+@faculty_bp.route("/export_reports", methods=["GET"])
+@jwt_required()
+def export_reports():
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+
+    # Filters (same as view_reports)
+    faculty_id = None
+    faculty_id_param = request.args.get("faculty_id")
+    if faculty_id_param:
+        try:
+            faculty_id = int(faculty_id_param)
+        except (ValueError, TypeError):
+            faculty_id = None
+
+    subject = request.args.get("subject")
+    date = request.args.get("date")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    division = request.args.get("division")
+    faculty_name = request.args.get("faculty_name")
+    status = request.args.get("status")
+    fmt = (request.args.get("format") or "csv").strip().lower()
+
+    query = Attendance.query
+    if faculty_id is not None:
+        query = query.filter_by(faculty_id=faculty_id)
+    if subject:
+        query = query.filter_by(subject=subject)
+    if start_date and end_date:
+        try:
+            sd = date_cls.fromisoformat(start_date)
+            ed = date_cls.fromisoformat(end_date)
+            query = query.filter(Attendance.date >= sd, Attendance.date <= ed)
+        except ValueError:
+            if date:
+                query = query.filter(Attendance.date.like(f"%{date}%"))
+    elif date:
+        query = query.filter(Attendance.date.like(f"%{date}%"))
+    if division:
+        query = query.join(Student).filter(Student.division == division)
+    if faculty_name:
+        query = query.join(Faculty, Attendance.faculty).filter(Faculty.full_name.ilike(f"%{faculty_name}%"))
+    if status:
+        query = query.filter(Attendance.status == status)
+
+    # Always join student to avoid N+1 when exporting
+    query = query.join(Student, Attendance.student_id == Student.id)
+    query = query.order_by(Attendance.date.desc())
+    items = query.all()
+
+    headers = ["Student", "Roll", "Division", "Faculty", "Subject", "Date", "Status"]
+
+    if fmt == "excel":
+        # Simple HTML table (Excel-compatible)
+        rows_html = []
+        for record in items:
+            student = record.student or Student.query.get(record.student_id)
+            rows_html.append(
+                "<tr>" +
+                f"<td>{(student.full_name if student else '')}</td>" +
+                f"<td>{(student.roll_number if student else '')}</td>" +
+                f"<td>{(student.division if student else '')}</td>" +
+                f"<td>{(record.faculty.full_name if record.faculty else 'N/A')}</td>" +
+                f"<td>{(record.subject or '')}</td>" +
+                f"<td>{(record.date.isoformat() if record.date else '')}</td>" +
+                f"<td>{(record.status or '')}</td>" +
+                "</tr>"
+            )
+        table_html = (
+            "<table>" +
+            "<tr>" + ''.join([f"<th>{h}</th>" for h in headers]) + "</tr>" +
+            ''.join(rows_html) +
+            "</table>"
+        )
+        html_doc = (
+            "<!DOCTYPE html><html><head><meta charset=\"utf-8\"></head>" +
+            f"<body>{table_html}</body></html>"
+        )
+        ts = datetime.now().strftime("%Y-%m-%d")
+        return (
+            html_doc,
+            200,
+            {
+                "Content-Type": "application/vnd.ms-excel;charset=utf-8;",
+                "Content-Disposition": f"attachment; filename=attendance-{ts}.xls",
+            },
+        )
+
+    # Default CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(headers)
+    for record in items:
+        student = record.student or Student.query.get(record.student_id)
+        writer.writerow([
+            (student.full_name if student else ''),
+            (student.roll_number if student else ''),
+            (student.division if student else ''),
+            (record.faculty.full_name if record.faculty else 'N/A'),
+            (record.subject or ''),
+            (record.date.isoformat() if record.date else ''),
+            (record.status or ''),
+        ])
+    csv_content = output.getvalue()
+    output.close()
+    ts = datetime.now().strftime("%Y-%m-%d")
+    return (
+        csv_content,
+        200,
+        {
+            "Content-Type": "text/csv;charset=utf-8;",
+            "Content-Disposition": f"attachment; filename=attendance-{ts}.csv",
+        },
+    )
 
 # -----------------------------------------
 # 🧹 Route: Delete Attendance (Mark Absent)
