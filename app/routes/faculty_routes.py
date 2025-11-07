@@ -12,7 +12,8 @@ faculty_bp = Blueprint("faculty_bp", __name__)
 
 # Temporary storages
 otp_sessions = {}  # {faculty_id: {otp, expiry}}
-faculty_locations = {}  # {faculty_id: (lat, lon)}
+# {faculty_id: {"latitude": float, "longitude": float, "timestamp": datetime, "accuracy": float|None}}
+faculty_locations = {}
 otp_to_faculty = {}  # {otp: faculty_id} - reverse lookup for OTP to faculty mapping
 otp_used_by_students = {}  # {(otp, student_id): True} - track which students have used which OTP
 
@@ -131,16 +132,41 @@ def update_location():
     if claims.get("type") != "faculty":
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
     
-    data = request.get_json()
+    data = request.get_json() or {}
     latitude = data.get('latitude')
     longitude = data.get('longitude')
+    accuracy = data.get('accuracy')
 
     if latitude is None or longitude is None:
         return jsonify({'status': 'error', 'message': 'Missing location data'}), 400
 
-    faculty_locations[current_user_id] = (float(latitude), float(longitude))
+    try:
+        lat_val = float(latitude)
+        lon_val = float(longitude)
+    except (TypeError, ValueError):
+        return jsonify({'status': 'error', 'message': 'Invalid location format'}), 400
 
-    return jsonify({'status': 'success', 'message': 'Location updated successfully'})
+    accuracy_val = None
+    if accuracy is not None:
+        try:
+            accuracy_val = float(accuracy)
+        except (TypeError, ValueError):
+            accuracy_val = None
+
+    timestamp = datetime.now(timezone.utc)
+    faculty_locations[current_user_id] = {
+        'latitude': lat_val,
+        'longitude': lon_val,
+        'timestamp': timestamp,
+        'accuracy': accuracy_val
+    }
+
+    return jsonify({
+        'status': 'success',
+        'message': 'Location updated successfully',
+        'timestamp': timestamp.isoformat(),
+        'accuracy': accuracy_val
+    })
 
 # -----------------------------------------
 # 📋 Route: List Faculty (for dropdowns)

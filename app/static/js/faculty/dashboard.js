@@ -63,7 +63,15 @@ document.getElementById('report-filters')?.addEventListener('submit', async (e)=
 		const size = Number(data.size || currentReportSize);
 		const startIdx = total ? (page - 1) * size + 1 : 0;
 		const endIdx = Math.min(page * size, total);
-		if(countEl){ countEl.textContent = String(total); }
+		if(countEl){ 
+            countEl.textContent = String(total);
+            // Add animation class to parent for visual feedback
+            const countValueEl = countEl.parentElement;
+            if(countValueEl){
+                countValueEl.classList.add('animate');
+                setTimeout(()=> countValueEl.classList.remove('animate'), 500);
+            }
+        }
 		if(pageInfo){ pageInfo.textContent = total ? `Showing ${startIdx}–${endIdx} of ${total}` : ''; }
 		if(prevBtn){ prevBtn.disabled = page <= 1; }
 		if(nextBtn){ nextBtn.disabled = endIdx >= total; }
@@ -83,7 +91,15 @@ document.getElementById('report-filters')?.addEventListener('submit', async (e)=
         if((data.records || []).length === 0){ emptyEl?.classList.remove('hidden'); }
 	}else{
         lastReportRecords = [];
-        if(countEl){ countEl.textContent = '0'; }
+        if(countEl){ 
+            countEl.textContent = '0';
+            // Add animation class to parent for visual feedback
+            const countValueEl = countEl.parentElement;
+            if(countValueEl){
+                countValueEl.classList.add('animate');
+                setTimeout(()=> countValueEl.classList.remove('animate'), 500);
+            }
+        }
         if(pageInfo){ pageInfo.textContent = ''; }
         if(prevBtn){ prevBtn.disabled = true; }
         if(nextBtn){ nextBtn.disabled = true; }

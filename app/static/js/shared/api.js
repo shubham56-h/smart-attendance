@@ -29,12 +29,22 @@ function showMsg(el, text, ok=true){
 	el.className = `mt-2 text-sm ${ok ? 'text-green-600' : 'text-red-600'}`;
 }
 
+const GEOLOCATION_OPTIONS = {
+	enableHighAccuracy: true,
+	timeout: 15000,
+	maximumAge: 0
+};
+
 async function getCurrentPosition(){
 	return new Promise((resolve, reject)=>{
 		navigator.geolocation.getCurrentPosition(
-			pos=> resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+			pos=> resolve({
+				latitude: pos.coords.latitude,
+				longitude: pos.coords.longitude,
+				accuracy: pos.coords.accuracy
+			}),
 			reject,
-			{ enableHighAccuracy: true, timeout: 10000 }
+			GEOLOCATION_OPTIONS
 		);
 	});
 }

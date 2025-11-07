@@ -4,13 +4,17 @@ from app.models import Attendance, Student
 from app.routes.faculty_routes import otp_sessions, faculty_locations, otp_to_faculty, otp_used_by_students
 from app.utils import hash_password, verify_password, generate_tokens
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jwt
-from datetime import datetime, timezone
-import math, time
+from datetime import datetime, timezone, timedelta
+import math
 
 student_bp = Blueprint("student", __name__)
 
 # Store student locations temporarily in memory
+# {student_id: {"latitude": float, "longitude": float, "timestamp": datetime, "accuracy": float|None}}
 student_locations = {}
+
+LOCATION_MAX_AGE_SECONDS = 300  # 5 minutes
+LOCATION_SYNC_THRESHOLD_SECONDS = 180  # 3 minutes between faculty & student updates
 
 # Helper: Calculate distance between two lat-long points (in meters)
 def calculate_distance(lat1, lon1, lat2, lon2):
@@ -110,15 +114,41 @@ def update_student_location():
     if claims.get("type") != "student":
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
     
-    data = request.get_json()
+    data = request.get_json() or {}
     lat = data.get("latitude")
     lon = data.get("longitude")
+    accuracy = data.get("accuracy")
 
-    if not all([lat, lon]):
+    if lat is None or lon is None:
         return jsonify({"status": "error", "message": "Missing location data"}), 400
 
-    student_locations[current_user_id] = (lat, lon)
-    return jsonify({"status": "success", "message": "Location updated successfully"})
+    try:
+        lat_val = float(lat)
+        lon_val = float(lon)
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Invalid location format"}), 400
+
+    accuracy_val = None
+    if accuracy is not None:
+        try:
+            accuracy_val = float(accuracy)
+        except (TypeError, ValueError):
+            accuracy_val = None
+
+    timestamp = datetime.now(timezone.utc)
+    student_locations[current_user_id] = {
+        "latitude": lat_val,
+        "longitude": lon_val,
+        "timestamp": timestamp,
+        "accuracy": accuracy_val
+    }
+
+    return jsonify({
+        "status": "success",
+        "message": "Location updated successfully",
+        "timestamp": timestamp.isoformat(),
+        "accuracy": accuracy_val
+    })
 
 # -------------------------------
 # 4️⃣ Fill attendance
@@ -180,8 +210,46 @@ def fill_attendance():
     if not faculty_loc or not student_loc:
         return jsonify({"status": "error", "message": "Location data missing"}), 400
 
-    distance = calculate_distance(faculty_loc[0], faculty_loc[1], student_loc[0], student_loc[1])
-    if distance > 100:
+    if not isinstance(faculty_loc, dict) or not isinstance(student_loc, dict):
+        return jsonify({
+            "status": "error",
+            "message": "Location data format outdated. Please update locations again."
+        }), 400
+
+    faculty_timestamp = faculty_loc.get("timestamp")
+    student_timestamp = student_loc.get("timestamp")
+    now_utc = datetime.now(timezone.utc)
+
+    for label, ts in ("faculty", faculty_timestamp), ("student", student_timestamp):
+        if ts is None:
+            return jsonify({"status": "error", "message": f"{label.capitalize()} location timestamp missing"}), 400
+        if now_utc - ts > timedelta(seconds=LOCATION_MAX_AGE_SECONDS):
+            return jsonify({"status": "error", "message": f"{label.capitalize()} location is outdated. Please update location again."}), 400
+
+    timestamp_diff = abs((faculty_timestamp - student_timestamp).total_seconds())
+    if timestamp_diff > LOCATION_SYNC_THRESHOLD_SECONDS:
+        return jsonify({
+            "status": "error",
+            "message": "Location updates are not synchronized. Please refresh both locations."
+        }), 400
+
+    distance = calculate_distance(
+        faculty_loc["latitude"],
+        faculty_loc["longitude"],
+        student_loc["latitude"],
+        student_loc["longitude"]
+    )
+
+    def _safe_accuracy(val):
+        try:
+            return float(val)
+        except (TypeError, ValueError):
+            return 0.0
+
+    accuracy_buffer = _safe_accuracy(faculty_loc.get("accuracy")) + _safe_accuracy(student_loc.get("accuracy"))
+    allowed_radius = max(100.0, accuracy_buffer)
+
+    if distance > allowed_radius:
         return jsonify({"status": "error", "message": "Out of range"}), 403
 
     # Check if student has already marked attendance for this subject today

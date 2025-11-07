@@ -109,9 +109,12 @@ document.getElementById('report-filters')?.addEventListener('submit', async (e)=
         const endIdx = Math.min(page * size, total);
         if(countEl){
             countEl.textContent = String(total);
-            // brief highlight
-            countEl.classList.add('text-blue-600','font-semibold');
-            setTimeout(()=> countEl.classList.remove('text-blue-600','font-semibold'), 800);
+            // Add animation class to parent for visual feedback
+            const countValueEl = countEl.parentElement;
+            if(countValueEl){
+                countValueEl.classList.add('animate');
+                setTimeout(()=> countValueEl.classList.remove('animate'), 500);
+            }
         }
         if(pageInfo){ pageInfo.textContent = total ? `Showing ${startIdx}–${endIdx} of ${total}` : ''; }
         if(prevBtn){ prevBtn.disabled = page <= 1; }
