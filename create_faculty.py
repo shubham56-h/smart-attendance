@@ -1,4 +1,3 @@
-# create_faculty.py
 from app import create_app, db
 from app.models import Faculty
 from app.utils import hash_password
@@ -6,17 +5,20 @@ from app.utils import hash_password
 app = create_app()
 
 with app.app_context():
-    # Change these values as you like
-    f1 = Faculty(full_name="krisha", email="krisha@gmail.com", password=hash_password("krisha123"))
-    f2 = Faculty(full_name="kalyani", email="kalyani@gmail.com", password=hash_password("kalyani123"))
-    f3 = Faculty(full_name="pritesh", email="pritesh@gmail.com", password=hash_password("pritesh123"))
-    f4 = Faculty(full_name="vrusabh", email="vrusabh@gmail.com", password=hash_password("vrusabh123"))
-    db.session.add(f1)
-    db.session.add(f2)
-    db.session.add(f3)
-    db.session.add(f4)
-    db.session.commit()
-    print("Created faculty:", f1.id, f1.email)
-    print("Created faculty:", f2.id, f2.email)
-    print("Created faculty:", f3.id, f3.email)
-    print("Created faculty:", f4.id, f4.email)
+    # Check if faculty already exists
+    existing = Faculty.query.filter_by(email="faculty@example.com").first()
+    if existing:
+        print(f"Faculty already exists: {existing.full_name}")
+    else:
+        # Create a new faculty member
+        faculty = Faculty(
+            full_name="Test Faculty",
+            email="faculty@example.com",
+            mobile_number="1234567890",
+            password=hash_password("password123")
+        )
+        db.session.add(faculty)
+        db.session.commit()
+        print(f"Faculty created successfully!")
+        print(f"Email: faculty@example.com")
+        print(f"Password: password123")

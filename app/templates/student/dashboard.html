@@ -3,24 +3,9 @@
 	<h1 class="text-2xl font-bold mb-6">Student Dashboard</h1>
 	<div class="grid lg:grid-cols-2 gap-6">
 		<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-			<h2 class="font-semibold mb-3">Update Live Location</h2>
-			<button id="student-update-location" class="btn-secondary">Share Current Location</button>
-			<p id="student-location-msg" class="mt-2 text-sm"></p>
-		</div>
-		<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-			<h2 class="font-semibold mb-3">Fill Attendance</h2>
-			<form id="student-attendance" class="grid gap-3">
-				<select class="input" name="subject" required>
-					<option value="">Select Subject</option>
-					<option value="SSAE">SSAE</option>
-					<option value="WAD">WAD</option>
-					<option value="DAA">DAA</option>
-					<option value="DM">DM</option>
-				</select>
-				<input class="input" placeholder="OTP" name="otp" required>
-				<button class="btn-primary mt-2">Mark Present</button>
-			</form>
-			<p id="student-attendance-msg" class="mt-2 text-sm"></p>
+			<h2 class="font-semibold mb-3">📝 Mark Attendance</h2>
+			<p class="text-sm text-slate-600 mb-4">Mark your attendance for today's class</p>
+			<a href="/student/mark_attendance" class="btn-primary">Go to Mark Attendance</a>
 		</div>
 	</div>
 	<div class="mt-6">
