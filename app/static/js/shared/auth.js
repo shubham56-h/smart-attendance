@@ -6,6 +6,7 @@ function ensureAuthenticated(role, redirectTo){
 function logout(role, redirectTo){
 	localStorage.removeItem(`${role}_access_token`);
 	localStorage.removeItem(`${role}_refresh_token`);
+	localStorage.removeItem(`${role}_name`);
 	window.location.href = redirectTo;
 }
 

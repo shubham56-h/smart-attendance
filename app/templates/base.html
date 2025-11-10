@@ -9,17 +9,177 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] }, colors: { primary: { DEFAULT:'#2563eb' } } } } };</script>
+	<style>
+		.nav-link {
+			position: relative;
+			font-weight: 500;
+			padding: 6px 12px;
+			border-radius: 6px;
+			transition: all 0.3s ease;
+		}
+		
+		.nav-link::after {
+			content: '';
+			position: absolute;
+			bottom: 2px;
+			left: 50%;
+			width: 0;
+			height: 2px;
+			background: linear-gradient(90deg, #2563eb, #7c3aed);
+			transform: translateX(-50%);
+			transition: width 0.3s ease;
+		}
+		
+		.nav-link:hover {
+			color: #2563eb;
+			background: rgba(37, 99, 235, 0.05);
+		}
+		
+		.nav-link:hover::after {
+			width: 80%;
+		}
+		
+		/* Message Styles */
+		.msg-error {
+			padding: 0.75rem 1rem;
+			border-radius: 0.5rem;
+			background: #fef2f2;
+			border: 1px solid #fecaca;
+			color: #991b1b;
+			font-size: 0.875rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+		
+		.msg-success {
+			padding: 0.75rem 1rem;
+			border-radius: 0.5rem;
+			background: #f0fdf4;
+			border: 1px solid #bbf7d0;
+			color: #166534;
+			font-size: 0.875rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+		
+		.msg-info {
+			padding: 0.75rem 1rem;
+			border-radius: 0.5rem;
+			background: #eff6ff;
+			border: 1px solid #bfdbfe;
+			color: #1e40af;
+			font-size: 0.875rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+		
+		.msg-error::before {
+			content: '❌';
+			font-size: 1rem;
+		}
+		
+		.msg-success::before {
+			content: '✅';
+			font-size: 1rem;
+		}
+		
+		.msg-info::before {
+			content: 'ℹ️';
+			font-size: 1rem;
+		}
+		
+		/* Profile Dropdown */
+		.profile-dropdown {
+			position: absolute;
+			top: 100%;
+			right: 0;
+			margin-top: 0.5rem;
+			background: white;
+			border: 1px solid #e2e8f0;
+			border-radius: 0.5rem;
+			box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+			min-width: 180px;
+			opacity: 0;
+			visibility: hidden;
+			transform: translateY(-10px);
+			transition: all 0.2s ease;
+			z-index: 50;
+		}
+		
+		.profile-dropdown.show {
+			opacity: 1;
+			visibility: visible;
+			transform: translateY(0);
+		}
+		
+		.profile-dropdown-item {
+			padding: 0.75rem 1rem;
+			cursor: pointer;
+			transition: background 0.15s ease;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.875rem;
+		}
+		
+		.profile-dropdown-item:hover {
+			background: #f8fafc;
+		}
+		
+		.profile-dropdown-item:first-child {
+			border-radius: 0.5rem 0.5rem 0 0;
+		}
+		
+		.profile-dropdown-item:last-child {
+			border-radius: 0 0 0.5rem 0.5rem;
+		}
+		
+		.profile-dropdown-divider {
+			height: 1px;
+			background: #e2e8f0;
+			margin: 0.25rem 0;
+		}
+	</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
 	<header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200">
 		<div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
 			<a href="/" class="flex items-center gap-2">
-				<div class="h-9 w-9 rounded-xl bg-primary text-white grid place-items-center font-bold">SA</div>
+				<div class="h-9 w-9 rounded-xl bg-primary text-white grid place-items-center font-bold text-sm">SA</div>
 				<div class="font-semibold">Smart Attendance</div>
 			</a>
-			<nav class="flex items-center gap-4 text-sm">
-				<a class="hover:text-primary" href="/student/login">Student</a>
-				<a class="hover:text-primary" href="/faculty/login">Faculty</a>
+			<nav class="flex items-center gap-2 text-sm">
+				<!-- Default links (shown when not logged in) -->
+				<a id="nav-student-link" class="nav-link" href="/student/login">Student</a>
+				<a id="nav-faculty-link" class="nav-link" href="/faculty/login">Faculty</a>
+				
+				<!-- Profile badge (shown when logged in) -->
+				<div id="nav-profile" class="hidden relative">
+					<div class="flex items-center gap-2">
+						<div id="nav-profile-badge" class="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white grid place-items-center font-bold text-sm shadow-md cursor-pointer hover:scale-110 transition-transform duration-300">
+						</div>
+					</div>
+					<!-- Dropdown Menu -->
+					<div id="profile-dropdown" class="profile-dropdown">
+						<div id="profile-dropdown-name" class="profile-dropdown-item" style="cursor: default; font-weight: 600; color: #334155;">
+						</div>
+						<div class="profile-dropdown-divider"></div>
+						<div id="profile-dropdown-dashboard" class="profile-dropdown-item">
+							<span>👤</span>
+							<span>Profile</span>
+						</div>
+						<div class="profile-dropdown-divider"></div>
+						<div id="profile-dropdown-logout" class="profile-dropdown-item" style="color: #dc2626;">
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+							</svg>
+							<span>Logout</span>
+						</div>
+					</div>
+				</div>
 			</nav>
 		</div>
 	</header>
@@ -31,6 +191,101 @@
 	<footer class="mt-12 py-6 text-center text-xs text-slate-500">
 		© {{ 2025 }} Smart Attendance
 	</footer>
+
+	<script>
+		// Update navbar based on login status
+		function updateNavbar() {
+			const studentToken = localStorage.getItem('student_access_token');
+			const facultyToken = localStorage.getItem('faculty_access_token');
+			
+			const studentLink = document.getElementById('nav-student-link');
+			const facultyLink = document.getElementById('nav-faculty-link');
+			const profileDiv = document.getElementById('nav-profile');
+			const profileBadge = document.getElementById('nav-profile-badge');
+			
+			if (studentToken || facultyToken) {
+				// User is logged in - show profile badge
+				if (studentLink) studentLink.style.display = 'none';
+				if (facultyLink) facultyLink.style.display = 'none';
+				if (profileDiv) profileDiv.classList.remove('hidden');
+				
+				// Get user name from localStorage or decode token
+				let userName = '';
+				let dashboardUrl = '/';
+				
+				if (studentToken) {
+					userName = localStorage.getItem('student_name') || 'Student';
+					dashboardUrl = '/student/dashboard';
+				} else if (facultyToken) {
+					userName = localStorage.getItem('faculty_name') || 'Faculty';
+					dashboardUrl = '/faculty/dashboard';
+				}
+				
+				// Set first character of name
+				if (profileBadge) {
+					profileBadge.textContent = userName.charAt(0).toUpperCase();
+					profileBadge.title = userName;
+					
+					// Setup dropdown
+					const dropdown = document.getElementById('profile-dropdown');
+					const dropdownName = document.getElementById('profile-dropdown-name');
+					const dropdownDashboard = document.getElementById('profile-dropdown-dashboard');
+					const dropdownLogout = document.getElementById('profile-dropdown-logout');
+					
+					if (dropdownName) {
+						dropdownName.textContent = userName;
+					}
+					
+					// Toggle dropdown on profile click
+					profileBadge.onclick = (e) => {
+						e.stopPropagation();
+						dropdown.classList.toggle('show');
+					};
+					
+					// Profile click
+					if (dropdownDashboard) {
+						dropdownDashboard.onclick = () => {
+							const profileUrl = studentToken ? '/student/profile' : '/faculty/profile';
+							window.location.href = profileUrl;
+						};
+					}
+					
+					// Logout click
+					if (dropdownLogout) {
+						dropdownLogout.onclick = () => {
+							// Clear tokens and redirect
+							if (studentToken) {
+								localStorage.removeItem('student_access_token');
+								localStorage.removeItem('student_refresh_token');
+								localStorage.removeItem('student_name');
+								window.location.href = '/student/login';
+							} else if (facultyToken) {
+								localStorage.removeItem('faculty_access_token');
+								localStorage.removeItem('faculty_refresh_token');
+								localStorage.removeItem('faculty_name');
+								window.location.href = '/faculty/login';
+							}
+						};
+					}
+					
+					// Close dropdown when clicking outside
+					document.addEventListener('click', (e) => {
+						if (dropdown && !profileDiv.contains(e.target)) {
+							dropdown.classList.remove('show');
+						}
+					});
+				}
+			} else {
+				// User is not logged in - show default links
+				if (studentLink) studentLink.style.display = '';
+				if (facultyLink) facultyLink.style.display = '';
+				if (profileDiv) profileDiv.classList.add('hidden');
+			}
+		}
+		
+		// Run on page load
+		document.addEventListener('DOMContentLoaded', updateNavbar);
+	</script>
 
 	{% block scripts %}{% endblock %}
 </body>

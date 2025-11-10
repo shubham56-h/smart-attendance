@@ -109,12 +109,12 @@ if(startBtn){
 		const subject = subjectInput?.value.trim();
 		
 		if(!subject){
-			SA.showMsg(msg, 'Please select a subject', false);
+			SA.showMsg(msg, 'Please select a subject', 'error');
 			return;
 		}
 		
 		if(!locationGranted){
-			SA.showMsg(msg, 'Location permission required', false);
+			SA.showMsg(msg, 'Location permission required', 'error');
 			return;
 		}
 		
@@ -132,17 +132,17 @@ if(startBtn){
 			const data = await res.json();
 			
 			if(res.ok){
-				SA.showMsg(msg, 'Session started successfully!', true);
+				SA.showMsg(msg, 'Session started successfully!', 'success');
 				showActiveSession(data);
 				const sessionForm = document.getElementById('session-form');
 				if(sessionForm) sessionForm.style.display = 'none';
 			}else{
-				SA.showMsg(msg, data.message || 'Failed to start session', false);
+				SA.showMsg(msg, data.message || 'Failed to start session', 'error');
 				btn.disabled = false;
 				btn.textContent = 'Start Session';
 			}
 		}catch(err){
-			SA.showMsg(msg, 'Error: ' + (err.message || 'Network error'), false);
+			SA.showMsg(msg, 'Error: ' + (err.message || 'Network error'), 'error');
 			btn.disabled = false;
 			btn.textContent = 'Start Session';
 		}
@@ -223,7 +223,7 @@ if(endBtn){
 					startBtn.disabled = true;
 					startBtn.textContent = 'Start Session';
 				}
-				if(sessionMsg) SA.showMsg(sessionMsg, 'Session ended successfully', true);
+				if(sessionMsg) SA.showMsg(sessionMsg, 'Session ended successfully', 'success');
 				
 				locationGranted = false;
 			}else{

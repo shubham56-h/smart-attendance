@@ -8,6 +8,10 @@ import os
 import secrets
 import threading
 import time
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize SQLAlchemy
 db = SQLAlchemy()
@@ -18,9 +22,15 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
 
-    # Configure database (SQLite for now)
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(base_dir, 'attendance.db')
+    # Configure database
+    # Get DATABASE_URL from environment or use default PostgreSQL
+    database_url = os.environ.get('DATABASE_URL', 'postgresql://postgres:postgres123@localhost:5432/attendance_db')
+    
+    # Fix for Heroku: postgres:// -> postgresql://
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Generate a secure random secret key if not set
@@ -92,6 +102,10 @@ def create_app():
     def student_mark_attendance_page():
         return render_template("student/mark_attendance.html")
 
+    @app.route("/student/profile")
+    def student_profile_page():
+        return render_template("student/profile.html")
+
     # Faculty pages
     @app.route("/faculty/login")
     def faculty_login_page():
@@ -109,6 +123,10 @@ def create_app():
     def faculty_reports_page():
         return render_template("faculty/reports.html")
 
+    @app.route("/faculty/profile")
+    def faculty_profile_page():
+        return render_template("faculty/profile.html")
+
     # -------------------------------
     # Background task for session cleanup
     # -------------------------------
@@ -116,7 +134,6 @@ def create_app():
         """Background task to periodically clean up expired sessions"""
         from app.utils.session_manager import SessionManager
         from sqlalchemy.exc import OperationalError
-        import sqlite3
         
         # Wait a bit for database to be initialized
         time.sleep(5)
@@ -133,7 +150,7 @@ def create_app():
                         deleted_count = session_manager.delete_old_sessions(older_than_days=7)
                         if expired_count > 0 or deleted_count > 0:
                             print(f"Session cleanup: Expired {expired_count} sessions, Deleted {deleted_count} old sessions")
-                    except (OperationalError, sqlite3.OperationalError) as e:
+                    except OperationalError as e:
                         # Table doesn't exist yet or database not ready, skip this cycle
                         pass
             except Exception as e:

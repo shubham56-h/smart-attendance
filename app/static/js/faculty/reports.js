@@ -257,3 +257,23 @@ document.getElementById('report-rows')?.addEventListener('click', async (e)=>{
 });
 
 
+
+// Toggle filters visibility
+document.getElementById('toggle-filters')?.addEventListener('click', ()=>{
+    const filtersForm = document.getElementById('report-filters');
+    const arrow = document.getElementById('filter-arrow');
+    if(!filtersForm) return;
+    
+    if(filtersForm.classList.contains('hidden')){
+        filtersForm.classList.remove('hidden');
+        arrow?.classList.add('rotate-180');
+    }else{
+        filtersForm.classList.add('hidden');
+        arrow?.classList.remove('rotate-180');
+    }
+});
+
+// Update Load button to trigger form submit
+document.getElementById('report-load')?.addEventListener('click', ()=>{
+    document.getElementById('report-filters')?.dispatchEvent(new Event('submit', { cancelable: true }));
+});

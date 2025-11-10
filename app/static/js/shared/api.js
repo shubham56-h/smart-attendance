@@ -23,10 +23,37 @@ async function apiFetch(role, path, { method = 'GET', body, auth = false } = {})
 	return res;
 }
 
-function showMsg(el, text, ok=true){
+function showMsg(el, text, type='error'){
 	if(!el) return;
+	
+	// Clear any existing timeout
+	if(el._hideTimeout){
+		clearTimeout(el._hideTimeout);
+		el._hideTimeout = null;
+	}
+	
 	el.textContent = text;
-	el.className = `mt-2 text-sm ${ok ? 'text-green-600' : 'text-red-600'}`;
+	el.style.opacity = '1';
+	el.style.transition = 'opacity 0.3s ease';
+	
+	// type can be: 'error', 'success', 'info'
+	if(type === 'success'){
+		el.className = 'msg-success';
+	} else if(type === 'info'){
+		el.className = 'msg-info';
+	} else {
+		el.className = 'msg-error';
+	}
+	
+	// Auto-hide after 5 seconds with fade out
+	el._hideTimeout = setTimeout(() => {
+		el.style.opacity = '0';
+		setTimeout(() => {
+			el.textContent = '';
+			el.className = '';
+			el.style.opacity = '1';
+		}, 300); // Wait for fade out to complete
+	}, 5000);
 }
 
 const GEOLOCATION_OPTIONS = {

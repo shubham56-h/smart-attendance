@@ -7,13 +7,13 @@ document.getElementById('student-register')?.addEventListener('submit', async (e
 		const res = await SA.apiFetch('student', '/student/register', { method: 'POST', body });
 		const data = await res.json();
 		if(res.ok){
-			SA.showMsg(msg, data.message || 'Registered');
+			SA.showMsg(msg, data.message || 'Registered successfully', 'success');
 			setTimeout(()=> window.location.href = '/student/login', 500);
 			form.reset();
 		}else{
-			SA.showMsg(msg, data.message || 'Registration failed', false);
+			SA.showMsg(msg, data.message || 'Registration failed', 'error');
 		}
-	}catch(err){ SA.showMsg(msg, 'Network error', false); }
+	}catch(err){ SA.showMsg(msg, 'Network error', 'error'); }
 });
 
 

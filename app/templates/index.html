@@ -1,21 +1,177 @@
 {% extends 'base.html' %}
 {% block content %}
-	<section class="grid md:grid-cols-2 gap-6">
-		<a href="/student/login" class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow">
-			<div class="flex items-center justify-between">
-				<h2 class="text-xl font-semibold">Student</h2>
-				<div class="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center group-hover:bg-primary group-hover:text-white">S</div>
-			</div>
-			<p class="mt-2 text-slate-600 text-sm">Register, login, update location and mark attendance.</p>
-		</a>
-		<a href="/faculty/login" class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow">
-			<div class="flex items-center justify-between">
-				<h2 class="text-xl font-semibold">Faculty</h2>
-				<div class="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center group-hover:bg-primary group-hover:text-white">F</div>
-			</div>
-			<p class="mt-2 text-slate-600 text-sm">Login, set live location, generate OTP, view reports.</p>
-		</a>
+	<!-- Hero Section - Mobile Optimized -->
+	<section class="text-center mb-8 md:mb-12 px-4">
+		<h1 class="text-3xl md:text-5xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight px-2">
+			 Smart Attendance 
+		</h1>
+		<p class="text-sm md:text-xl text-slate-600 max-w-2xl mx-auto mb-6 md:mb-8 px-2">
+			Modern attendance system with real-time location verification and OTP authentication. Enables efficient and proxy-free digital attendence and handy reports.
+		</p>
 	</section>
+
+	<!-- Main Action Buttons - Mobile First -->
+	<section class="mb-8 md:mb-12 px-4">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-4xl mx-auto">
+			<!-- Student Portal -->
+			<a href="/student/login" class="group relative overflow-hidden rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white p-6 shadow-md active:scale-[0.98] hover:shadow-xl hover:border-blue-400 transition-all duration-200">
+				<div class="absolute top-0 right-0 w-24 h-24 bg-blue-100 rounded-full -mr-12 -mt-12 opacity-50"></div>
+				<div class="relative">
+					<div class="flex items-center justify-between mb-3">
+						<h2 class="text-xl md:text-2xl font-bold text-slate-900">🎓 Student</h2>
+						<div class="h-12 w-12 md:h-14 md:w-14 rounded-xl border-2 border-blue-600 bg-transparent text-blue-600 grid place-items-center text-xl md:text-2xl font-bold shadow-lg transition-all duration-500 group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110">
+							S
+						</div>
+					</div>
+					<p class="text-sm md:text-base text-slate-600 mb-3">Mark attendance and view your records 📝</p>
+					<ul class="space-y-1.5 text-xs md:text-sm text-slate-600 mb-4">
+						<li class="flex items-center gap-2">
+							<span class="text-green-500 text-base">✓</span>
+							<span>📝 Register & Login</span>
+						</li>
+						<li class="flex items-center gap-2">
+							<span class="text-green-500 text-base">✓</span>
+							<span>🔢 Mark Attendance with OTP</span>
+						</li>
+						<li class="flex items-center gap-2">
+							<span class="text-green-500 text-base">✓</span>
+							<span>📜 View Attendance History</span>
+						</li>
+					</ul>
+					<div class="flex items-center text-blue-600 font-medium text-sm md:text-base">
+						🚀 Login as Student →
+					</div>
+				</div>
+			</a>
+
+			<!-- Faculty Portal -->
+			<a href="/faculty/login" class="group relative overflow-hidden rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white p-6 shadow-md active:scale-[0.98] hover:shadow-xl hover:border-purple-400 transition-all duration-200">
+				<div class="absolute top-0 right-0 w-24 h-24 bg-purple-100 rounded-full -mr-12 -mt-12 opacity-50"></div>
+				<div class="relative">
+					<div class="flex items-center justify-between mb-3">
+						<h2 class="text-xl md:text-2xl font-bold text-slate-900">👨‍🏫 Faculty</h2>
+						<div class="h-12 w-12 md:h-14 md:w-14 rounded-xl border-2 border-purple-600 bg-transparent text-purple-600 grid place-items-center text-xl md:text-2xl font-bold shadow-lg transition-all duration-500 group-hover:bg-purple-600 group-hover:text-white group-hover:scale-110">
+							F
+						</div>
+					</div>
+					<p class="text-sm md:text-base text-slate-600 mb-3">Manage sessions and track attendance 📋</p>
+					<ul class="space-y-1.5 text-xs md:text-sm text-slate-600 mb-4">
+						<li class="flex items-center gap-2">
+							<span class="text-green-500 text-base">✓</span>
+							<span>🎯 Create Attendance Sessions</span>
+						</li>
+						<li class="flex items-center gap-2">
+							<span class="text-green-500 text-base">✓</span>
+							<span>🔑 Generate OTP Codes</span>
+						</li>
+						<li class="flex items-center gap-2">
+							<span class="text-green-500 text-base">✓</span>
+							<span>📈 View Detailed Reports</span>
+						</li>
+					</ul>
+					<div class="flex items-center text-purple-600 font-medium text-sm md:text-base">
+						🚀 Login as Faculty →
+					</div>
+				</div>
+			</a>
+		</div>
+	</section>
+
+	<!-- Features - Mobile Optimized -->
+	<section class="mb-8 md:mb-12 px-4">
+		<h2 class="text-lg md:text-xl font-bold text-center mb-4 md:mb-6">✨ Key Features</h2>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 max-w-4xl mx-auto">
+			<div class="rounded-xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm">
+				<div class="h-10 w-10 rounded-lg bg-green-100 text-green-600 grid place-items-center mb-3">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+					</svg>
+				</div>
+				<h3 class="text-base font-semibold mb-1.5">📍 Location Verified</h3>
+				<p class="text-xs md:text-sm text-slate-600">GPS verification ensures physical presence ✅</p>
+			</div>
+
+			<div class="rounded-xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm">
+				<div class="h-10 w-10 rounded-lg bg-blue-100 text-blue-600 grid place-items-center mb-3">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+					</svg>
+				</div>
+				<h3 class="text-base font-semibold mb-1.5">🔐 Secure OTP</h3>
+				<p class="text-xs md:text-sm text-slate-600">Time-limited codes prevent proxy attendance 🚫</p>
+			</div>
+
+			<div class="rounded-xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm">
+				<div class="h-10 w-10 rounded-lg bg-purple-100 text-purple-600 grid place-items-center mb-3">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+					</svg>
+				</div>
+				<h3 class="text-base font-semibold mb-1.5">📊 Real-time Reports</h3>
+				<p class="text-xs md:text-sm text-slate-600">Instant tracking and analytics ⚡</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- How It Works - Mobile Optimized -->
+	<section class="mb-8 md:mb-12 bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6 md:p-10 mx-4">
+		<h2 class="text-lg md:text-xl font-bold text-center mb-6 md:mb-10">🚀 How It Works</h2>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
+			<div class="text-center">
+				<div class="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-blue-600 text-white text-xl md:text-2xl font-bold mb-3 md:mb-4 shadow-lg">
+					1
+				</div>
+				<h3 class="text-base md:text-lg font-semibold mb-2">👨‍🏫 Faculty Creates Session</h3>
+				<p class="text-xs md:text-sm text-slate-600">Faculty starts a session and generates unique OTP 🔑</p>
+			</div>
+			<div class="text-center">
+				<div class="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-purple-600 text-white text-xl md:text-2xl font-bold mb-3 md:mb-4 shadow-lg">
+					2
+				</div>
+				<h3 class="text-base md:text-lg font-semibold mb-2">🎓 Students Enter OTP</h3>
+				<p class="text-xs md:text-sm text-slate-600">Students enter OTP with location data</p>
+			</div>
+			<div class="text-center">
+				<div class="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-green-600 text-white text-xl md:text-2xl font-bold mb-3 md:mb-4 shadow-lg">
+					3
+				</div>
+				<h3 class="text-base md:text-lg font-semibold mb-2">✅ Attendance Verified</h3>
+				<p class="text-xs md:text-sm text-slate-600">System verifies and marks attendance</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- Footer - Mobile Optimized -->
+	<footer class="border-t border-slate-200 pt-6 md:pt-8 mt-8 md:mt-12 px-4">
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-8">
+			<div>
+				<div class="flex items-center gap-2 mb-3 md:mb-4">
+					<div class="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-primary text-white grid place-items-center font-bold text-xs">SA</div>
+					<span class="font-semibold text-base md:text-lg">Smart Attendance</span>
+				</div>
+				<p class="text-xs md:text-sm text-slate-600">Modern attendance system with Two step verification : Location 📍 + OTP 🔐.</p>
+			</div>
+			<div>
+				<h4 class="font-semibold mb-3 md:mb-4 text-sm md:text-base">🔗 Quick Links</h4>
+				<ul class="space-y-1.5 md:space-y-2 text-xs md:text-sm text-slate-600">
+					<li><a href="/student/login" class="hover:text-primary active:text-primary">🎓 Student Login</a></li>
+					<li><a href="/student/register" class="hover:text-primary active:text-primary">📝 Student Register</a></li>
+					<li><a href="/faculty/login" class="hover:text-primary active:text-primary">👨‍🏫 Faculty Login</a></li>
+				</ul>
+			</div>
+			<div>
+				<h4 class="font-semibold mb-3 md:mb-4 text-sm md:text-base">✨ Features</h4>
+				<ul class="space-y-1.5 md:space-y-2 text-xs md:text-sm text-slate-600">
+					<li>📍 GPS Location Verification</li>
+					<li>🔐 OTP-Based Authentication</li>
+					<li>⚡ Real-time Tracking</li>
+					<li>📊 Comprehensive Reports</li>
+				</ul>
+			</div>
+		</div>
+		<div class="border-t border-slate-200 pt-4 md:pt-6 text-center text-xs md:text-sm text-slate-600">
+			<p>© 2025 Smart Attendance. All rights reserved. 💼</p>
+		</div>
+	</footer>
 {% endblock %}
-
-

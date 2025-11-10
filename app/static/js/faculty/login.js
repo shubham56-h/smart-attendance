@@ -8,12 +8,15 @@ document.getElementById('faculty-login')?.addEventListener('submit', async (e)=>
 		const data = await res.json();
 		if(res.ok){
 			SA.setTokens('faculty', data);
-			SA.showMsg(msg, 'Login successful');
+			if(data.faculty && data.faculty.full_name){
+				localStorage.setItem('faculty_name', data.faculty.full_name);
+			}
+			SA.showMsg(msg, 'Login successful', 'success');
 			setTimeout(()=> window.location.href = '/faculty/dashboard', 300);
 		}else{
-			SA.showMsg(msg, data.message || 'Invalid credentials', false);
+			SA.showMsg(msg, data.message || 'Invalid credentials', 'error');
 		}
-	}catch(err){ SA.showMsg(msg, 'Network error', false); }
+	}catch(err){ SA.showMsg(msg, 'Network error', 'error'); }
 });
 
 

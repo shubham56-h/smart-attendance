@@ -42,11 +42,44 @@ def login_student():
             "status": "success",
             "message": "Login successful",
             "student_id": student.id,
+            "student": {
+                "id": student.id,
+                "full_name": student.full_name,
+                "roll_number": student.roll_number,
+                "division": student.division,
+                "email": student.email
+            },
             "access_token": access_token,
             "refresh_token": refresh_token
         })
     else:
         return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+
+@student_bp.route("/profile", methods=["GET"])
+@jwt_required()
+def student_profile():
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    
+    if claims.get("type") != "student":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    student = Student.query.get(current_user_id)
+    
+    if not student:
+        return jsonify({"status": "error", "message": "Student not found"}), 404
+    
+    return jsonify({
+        "status": "success",
+        "student": {
+            "id": student.id,
+            "full_name": student.full_name,
+            "roll_number": student.roll_number,
+            "division": student.division,
+            "email": student.email,
+            "mobile_number": student.mobile_number
+        }
+    })
 
 @student_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)

@@ -95,13 +95,13 @@ document.getElementById('attendance-form')?.addEventListener('submit', async (e)
 		const data = await res.json();
 		
 		if(res.ok){
-			SA.showMsg(msg, data.message || 'Attendance marked successfully!', true);
+			SA.showMsg(msg, data.message || 'Attendance marked successfully!', 'success');
 			form.reset();
 		}else{
-			SA.showMsg(msg, data.message || 'Failed to mark attendance', false);
+			SA.showMsg(msg, data.message || 'Failed to mark attendance', 'error');
 		}
 	}catch(err){
-		SA.showMsg(msg, 'Error: ' + (err.message || 'Network error'), false);
+		SA.showMsg(msg, 'Error: ' + (err.message || 'Network error'), 'error');
 	}finally{
 		submitting = false;
 		submitBtn.disabled = false;

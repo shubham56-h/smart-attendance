@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+	<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+		<!-- Header -->
+		<div class="bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-8 text-white">
+			<div class="flex items-center gap-4">
+				<div id="profile-avatar" class="h-20 w-20 rounded-full bg-white/20 backdrop-blur grid place-items-center font-bold text-3xl">
+				</div>
+				<div>
+					<h1 id="profile-name" class="text-2xl font-bold">Loading...</h1>
+					<p id="profile-role" class="text-blue-100">Faculty</p>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Profile Info -->
+		<div class="p-6 space-y-4">
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div class="space-y-1">
+					<label class="text-xs font-medium text-slate-500 uppercase">Full Name</label>
+					<p id="info-name" class="text-slate-900 font-medium">-</p>
+				</div>
+				<div class="space-y-1">
+					<label class="text-xs font-medium text-slate-500 uppercase">Email</label>
+					<p id="info-email" class="text-slate-900 font-medium">-</p>
+				</div>
+				<div class="space-y-1">
+					<label class="text-xs font-medium text-slate-500 uppercase">Mobile Number</label>
+					<p id="info-mobile" class="text-slate-900 font-medium">-</p>
+				</div>
+			</div>
+			
+			<div class="pt-4 border-t border-slate-200 flex gap-3">
+				<a href="/faculty/dashboard" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors">
+					Back to Dashboard
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	async function loadProfile() {
+		try {
+			const res = await SA.apiFetch('faculty', '/faculty/profile', { method: 'GET' });
+			const data = await res.json();
+			
+			if (res.ok && data.status === 'success') {
+				const faculty = data.faculty;
+				
+				// Update avatar
+				document.getElementById('profile-avatar').textContent = faculty.full_name.charAt(0).toUpperCase();
+				
+				// Update header
+				document.getElementById('profile-name').textContent = faculty.full_name;
+				
+				// Update info fields
+				document.getElementById('info-name').textContent = faculty.full_name;
+				document.getElementById('info-email').textContent = faculty.email;
+				document.getElementById('info-mobile').textContent = faculty.mobile_number;
+			} else {
+				SA.showMsg(document.body, data.message || 'Failed to load profile', 'error');
+			}
+		} catch (err) {
+			console.error('Profile load error:', err);
+			SA.showMsg(document.body, 'Network error', 'error');
+		}
+	}
+	
+	document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+{% endblock %}

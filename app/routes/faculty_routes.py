@@ -37,8 +37,40 @@ def faculty_login():
         'status': 'success',
         'message': 'Login successful',
         'faculty_id': faculty.id,
+        'faculty': {
+            'id': faculty.id,
+            'full_name': faculty.full_name,
+            'email': faculty.email
+        },
         'access_token': access_token,
         'refresh_token': refresh_token
+    })
+
+# -------------------------------
+# Faculty Profile
+# -------------------------------
+@faculty_bp.route('/profile', methods=['GET'])
+@jwt_required()
+def faculty_profile():
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    faculty = Faculty.query.get(current_user_id)
+    
+    if not faculty:
+        return jsonify({"status": "error", "message": "Faculty not found"}), 404
+    
+    return jsonify({
+        "status": "success",
+        "faculty": {
+            "id": faculty.id,
+            "full_name": faculty.full_name,
+            "email": faculty.email,
+            "mobile_number": faculty.mobile_number
+        }
     })
 
 # -------------------------------

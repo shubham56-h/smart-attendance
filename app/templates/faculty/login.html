@@ -1,19 +1,172 @@
 {% extends 'base.html' %}
 {% block content %}
-	<h1 class="text-2xl font-bold mb-6">Faculty Login</h1>
-	<div class="max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-		<form id="faculty-login" class="grid gap-3">
-			<input class="input" type="email" placeholder="Email" name="email" required>
-			<input class="input" type="password" placeholder="Password" name="password" required>
-			<button class="btn-primary mt-2 w-full">Sign In</button>
-		</form>
-		<p id="faculty-login-msg" class="mt-2 text-sm"></p>
+	<div class="min-h-[80vh] flex items-center justify-center">
+		<div class="w-full max-w-md">
+			<!-- Header with Icon -->
+			<div class="text-center mb-8">
+				<h1 class="text-3xl font-bold mb-2">
+					<span class="text-4xl mr-2">👨‍🏫</span>
+					<span class="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Faculty Login</span>
+				</h1>
+				<p class="text-slate-600 text-sm">Welcome back! Please login to your account</p>
+			</div>
+
+			<!-- Login Card -->
+			<div class="login-card rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+				<form id="faculty-login" class="space-y-5">
+					<!-- Email Input -->
+					<div class="input-group">
+						<label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+						<div class="relative">
+							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+								</svg>
+							</div>
+							<input class="input pl-10" type="email" placeholder="Enter your email" name="email" required>
+						</div>
+					</div>
+
+					<!-- Password Input -->
+					<div class="input-group">
+						<label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+						<div class="relative">
+							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+								</svg>
+							</div>
+							<input class="input pl-10" type="password" placeholder="Enter your password" name="password" required>
+						</div>
+					</div>
+
+					<!-- Submit Button -->
+					<button type="submit" class="btn-primary w-full mt-6 group">
+						<span class="transition-all duration-300">Log In</span>
+						<svg class="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+						</svg>
+					</button>
+				</form>
+
+				<!-- Message -->
+				<p id="faculty-login-msg" class="mt-4 text-sm text-center"></p>
+			</div>
+		</div>
 	</div>
+
 	<style>
-		.input{ width:100%; border-radius:0.5rem; border:1px solid #cbd5e1; padding:0.5rem 0.75rem; outline:none; }
-		.input:focus{ box-shadow:0 0 0 3px rgba(37,99,235,0.3); }
-		.btn-primary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#2563eb; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
-		.btn-primary:hover{ background:#1d4ed8; }
+		.login-card {
+			position: relative;
+			transition: all 0.3s ease;
+		}
+
+		.login-card::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border-radius: 1rem;
+			padding: 2px;
+			background: linear-gradient(90deg, transparent, transparent, #7c3aed, transparent, transparent);
+			background-size: 200% 100%;
+			-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			-webkit-mask-composite: xor;
+			mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			mask-composite: exclude;
+			animation: border-slide 5s linear infinite;
+		}
+
+		@keyframes border-slide {
+			0% { background-position: 200% 0; }
+			100% { background-position: -200% 0; }
+		}
+
+		.input-group {
+			position: relative;
+		}
+
+		.input {
+			width: 100%;
+			border-radius: 0.75rem;
+			border: 2px solid #e2e8f0;
+			padding: 0.75rem 1rem 0.75rem 2.75rem;
+			outline: none;
+			transition: all 0.3s ease;
+			background: #f8fafc;
+		}
+
+		.input:focus {
+			border-color: #7c3aed;
+			background: white;
+			box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+			transform: translateY(-2px);
+		}
+
+		.input::placeholder {
+			color: #94a3b8;
+		}
+
+		.btn-primary {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 0.75rem;
+			background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+			background-size: 200% 200%;
+			padding: 0.875rem 1.5rem;
+			color: white;
+			font-weight: 600;
+			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			border: none;
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.btn-primary::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+			transition: left 0.6s ease;
+		}
+
+		.btn-primary::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border-radius: 0.75rem;
+			padding: 2px;
+			background: linear-gradient(135deg, #a78bfa, #ec4899, #60a5fa);
+			-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			-webkit-mask-composite: xor;
+			mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			mask-composite: exclude;
+			opacity: 0;
+			transition: opacity 0.4s ease;
+		}
+
+		.btn-primary:hover {
+			background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+			transform: translateY(-3px) scale(1.02);
+			box-shadow: 0 12px 30px rgba(124, 58, 237, 0.4);
+		}
+
+		.btn-primary:hover::before {
+			left: 100%;
+		}
+
+		.btn-primary:hover::after {
+			opacity: 1;
+		}
+
+		.btn-primary:active {
+			transform: translateY(-1px) scale(1);
+			transition: all 0.1s ease;
+		}
 	</style>
 {% endblock %}
 {% block scripts %}

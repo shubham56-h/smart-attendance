@@ -6,22 +6,54 @@
     </div>
 
     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex items-center gap-3">
-                <div class="report-count-badge">
-                    <div class="report-count-label">Total Records</div>
-                    <div class="report-count-value">
-                        <span id="report-count">0</span>
-                    </div>
+        <!-- Stats Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <!-- Total Count Badge -->
+            <div class="report-count-badge flex-shrink-0">
+                <div class="report-count-label">Total Records</div>
+                <div class="report-count-value">
+                    <span id="report-count">0</span>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button id="report-download-csv" class="btn-primary" type="button">Download CSV</button>
-                <button id="report-download-excel" class="btn-primary" type="button">Download Excel</button>
+            
+            <!-- Download Buttons - Compact -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <button id="report-download-csv" class="btn-download-csv" type="button">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>CSV</span>
+                </button>
+                <button id="report-download-excel" class="btn-download-excel" type="button">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>Excel</span>
+                </button>
             </div>
         </div>
 
-        <form id="report-filters" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Filter Toggle and Load Button -->
+        <div class="flex items-center justify-between mb-4">
+            <button id="toggle-filters" class="filter-toggle-btn">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span>Filters</span>
+                <svg class="w-4 h-4 transition-transform duration-300" id="filter-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <button id="report-load" class="btn-load">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Load</span>
+            </button>
+        </div>
+
+        <!-- Collapsible Filters -->
+        <form id="report-filters" class="filter-section hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
             <label class="block">
                 <span class="block text-xs text-slate-500 mb-1">Subject</span>
                 <select class="input" name="subject">
@@ -60,21 +92,6 @@
             </label>
 
             <label class="block">
-                <span class="block text-xs text-slate-500 mb-1">Start Date</span>
-                <input class="input" type="date" name="start_date" id="report-start-date">
-            </label>
-            <label class="block">
-                <span class="block text-xs text-slate-500 mb-1">End Date</span>
-                <input class="input" type="date" name="end_date" id="report-end-date">
-            </label>
-            <div class="flex items-end gap-2 lg:col-span-2 flex-wrap">
-                <button type="button" class="btn-secondary" id="preset-today">Today</button>
-                <button type="button" class="btn-secondary" id="preset-week">This Week</button>
-                <button type="button" class="btn-secondary" id="preset-month">This Month</button>
-                <button type="button" class="btn-secondary" id="preset-reset">Reset All</button>
-            </div>
-
-            <label class="block">
                 <span class="block text-xs text-slate-500 mb-1">Page Size</span>
                 <select class="input" name="size" id="report-page-size">
                     <option value="10">10</option>
@@ -104,24 +121,36 @@
                 </select>
             </label>
 
-            <div class="flex items-end lg:col-span-1">
-                <button id="report-load" class="btn-secondary w-full">Load</button>
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">Start Date</span>
+                <input class="input" type="date" name="start_date" id="report-start-date">
+            </label>
+            <label class="block">
+                <span class="block text-xs text-slate-500 mb-1">End Date</span>
+                <input class="input" type="date" name="end_date" id="report-end-date">
+            </label>
+            <div class="flex items-end gap-2 lg:col-span-2 flex-wrap">
+                <button type="button" class="btn-secondary" id="preset-today">Today</button>
+                <button type="button" class="btn-secondary" id="preset-week">This Week</button>
+                <button type="button" class="btn-secondary" id="preset-month">This Month</button>
+                <button type="button" class="btn-secondary" id="preset-reset">Reset All</button>
             </div>
+
             <input type="hidden" name="page" id="report-page" value="1">
         </form>
 
-        <div id="report-table-wrapper" class="overflow-x-auto mt-4 rounded-xl border border-slate-200">
+        <div id="report-table-wrapper" class="overflow-x-auto rounded-xl border border-slate-200 mt-10">
             <table class="min-w-full text-sm">
-                <thead class="bg-slate-50">
-                    <tr class="text-left text-slate-600">
-                        <th class="py-2 pl-4 pr-4">Student</th>
-                        <th class="py-2 pr-4">Roll</th>
-                        <th class="py-2 pr-4">Division</th>
-                        <th class="py-2 pr-4">Faculty</th>
-                        <th class="py-2 pr-4">Subject</th>
-                        <th class="py-2 pr-4">Date</th>
-                        <th class="py-2 pr-4">Status</th>
-                        <th class="py-2 pr-4">Actions</th>
+                <thead class="bg-gradient-to-r from-slate-100 to-slate-50">
+                    <tr class="text-left text-slate-700 font-semibold"></tr>
+                        <th class="py-2 pl-4 pr-4 whitespace-nowrap">Student</th>
+                        <th class="py-2 pr-4 whitespace-nowrap">Roll</th>
+                        <th class="py-2 pr-4 whitespace-nowrap">Division</th>
+                        <th class="py-2 pr-4 whitespace-nowrap">Faculty</th>
+                        <th class="py-2 pr-4 whitespace-nowrap">Subject</th>
+                        <th class="py-2 pr-4 whitespace-nowrap">Date</th>
+                        <th class="py-2 pr-4 whitespace-nowrap">Status</th>
+                        <th class="py-2 pr-4 whitespace-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="report-rows"></tbody>
@@ -144,21 +173,121 @@
         <a href="/faculty/dashboard" class="text-sm text-slate-600">Back to dashboard</a>
     </div>
     <style>
-        .input{ width:100%; border-radius:0.5rem; border:1px solid #cbd5e1; padding:0.5rem 0.75rem; outline:none; }
-        .input:focus{ box-shadow:0 0 0 3px rgba(37,99,235,0.3); }
-        .btn-primary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#2563eb; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
-        .btn-primary:hover{ background:#1d4ed8; }
-        .btn-secondary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#0f172a; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
+        .input{ width:100%; border-radius:0.5rem; border:1px solid #cbd5e1; padding:0.5rem 0.75rem; outline:none; transition: all 0.3s ease; }
+        .input:focus{ box-shadow:0 0 0 3px rgba(37,99,235,0.3); border-color: #2563eb; }
+        .btn-primary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#2563eb; padding:0.5rem 1rem; color:#fff; transition:all .3s ease; }
+        .btn-primary:hover{ background:#1d4ed8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-secondary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#0f172a; padding:0.5rem 1rem; color:#fff; transition:all .3s ease; font-size: 0.875rem; }
         .btn-secondary:hover{ background:#000; }
+        
+        .filter-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-toggle-btn:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+        
+        .filter-section {
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .btn-load {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-load:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-download-csv {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.875rem;
+            border-radius: 0.375rem;
+            background: #f0fdf4;
+            color: #059669;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            border: 1px solid #d1fae5;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .btn-download-csv:hover {
+            background: #059669;
+            color: white;
+            border-color: #059669;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
+        }
+        
+        .btn-download-excel {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.875rem;
+            border-radius: 0.375rem;
+            background: #f0fdf4;
+            color: #16a34a;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            border: 1px solid #d1fae5;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .btn-download-excel:hover {
+            background: #16a34a;
+            color: white;
+            border-color: #16a34a;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.2);
+        }
         .report-count-badge{
-            display:flex;
+            display:inline-flex;
             flex-direction:column;
             align-items:flex-start;
+            justify-content:center;
             background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius:0.75rem;
-            padding:0.875rem 1.25rem;
+            padding:0.625rem 1rem;
             box-shadow:0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            min-width:140px;
             transition:transform 0.2s ease, box-shadow 0.2s ease;
         }
         .report-count-badge:hover{
@@ -174,7 +303,7 @@
             margin-bottom:0.25rem;
         }
         .report-count-value{
-            font-size:2rem;
+            font-size:1.75rem;
             font-weight:700;
             color:#ffffff;
             line-height:1;
@@ -184,7 +313,7 @@
         }
         .report-count-value::before{
             content:"📊";
-            font-size:1.5rem;
+            font-size:1.25rem;
             margin-right:0.25rem;
         }
         .report-count-value.animate{

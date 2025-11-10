@@ -1,48 +1,134 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold">Faculty Dashboard</h1>
-        <p class="text-slate-600 mt-1">Manage classes, generate OTPs, and view attendance analytics.</p>
+    <div class="max-w-5xl mx-auto py-8">
+        <!-- Welcome Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-slate-800 mb-2">Welcome Back! 👋</h1>
+            <p class="text-slate-600">Take attendance digitally and view & download reports</p>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Take Attendance Card -->
+            <a href="/faculty/take_attendance" class="action-card bg-gradient-to-br from-purple-500 to-purple-600 group">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-6xl">📝</div>
+                    <div class="action-icon">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Take Attendance</h2>
+                <p class="text-purple-100 text-sm">Start session & generate OTP</p>
+            </a>
+
+            <!-- View Reports Card -->
+            <a href="/faculty/reports" class="action-card bg-gradient-to-br from-blue-500 to-blue-600 group">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-6xl">📊</div>
+                    <div class="action-icon">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">View Reports</h2>
+                <p class="text-blue-100 text-sm">Browse & download reports</p>
+            </a>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="stat-card">
+                <div class="text-3xl mb-2">🎯</div>
+                <div class="text-2xl font-bold text-slate-800">Quick</div>
+                <div class="text-sm text-slate-600">Easy session setup</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-3xl mb-2">🔐</div>
+                <div class="text-2xl font-bold text-slate-800">Secure</div>
+                <div class="text-sm text-slate-600">OTP-based verification</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-3xl mb-2">📈</div>
+                <div class="text-2xl font-bold text-slate-800">Analytics</div>
+                <div class="text-sm text-slate-600">Detailed insights</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-6 border-t border-slate-200">
+            <div class="text-sm text-slate-500">💡 Tip: Use filters in reports for quick access</div>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-6">
-        <a href="/faculty/take_attendance" class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow transition">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-xl font-semibold">Take Attendance</h2>
-                    <p class="mt-1 text-slate-600 text-sm">Select subject, share location, generate OTP.</p>
-                </div>
-                <div class="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 grid place-items-center group-hover:bg-blue-600 group-hover:text-white transition">A</div>
-            </div>
-        </a>
-        <a href="/faculty/reports" class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow transition">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-xl font-semibold">View Reports</h2>
-                    <p class="mt-1 text-slate-600 text-sm">Quickly browse, sort, and download attendance reports.</p>
-                </div>
-                <div class="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center group-hover:bg-emerald-600 group-hover:text-white transition">R</div>
-            </div>
-        </a>
-    </div>
+    <style>
+        .action-card {
+            display: block;
+            padding: 2rem;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
 
-    <div class="mt-6 flex items-center justify-between">
-        <div class="text-xs text-slate-500">Tip: Use filters to quickly find specific classes or dates.</div>
-        <button id="faculty-logout" class="text-sm text-red-600">Logout</button>
-    </div>
-	<style>
-		.input{ width:100%; border-radius:0.5rem; border:1px solid #cbd5e1; padding:0.5rem 0.75rem; outline:none; }
-		.input:focus{ box-shadow:0 0 0 3px rgba(37,99,235,0.3); }
-		.btn-primary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#2563eb; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
-		.btn-primary:hover{ background:#1d4ed8; }
-		.btn-secondary{ display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; background:#0f172a; padding:0.5rem 1rem; color:#fff; transition:background-color .2s ease; }
-		.btn-secondary:hover{ background:#000; }
-	</style>
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-card:hover::before {
+            left: 100%;
+        }
+
+        .action-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover .action-icon {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(45deg);
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+    </style>
 {% endblock %}
 {% block scripts %}
 	<script src="/static/js/shared/api.js"></script>
 	<script src="/static/js/shared/auth.js"></script>
     <script src="/static/js/faculty/dashboard.js"></script>
 {% endblock %}
-
-

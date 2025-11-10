@@ -8,12 +8,15 @@ document.getElementById('student-login')?.addEventListener('submit', async (e)=>
 		const data = await res.json();
 		if(res.ok){
 			SA.setTokens('student', data);
-			SA.showMsg(msg, 'Login successful');
+			if(data.student && data.student.full_name){
+				localStorage.setItem('student_name', data.student.full_name);
+			}
+			SA.showMsg(msg, 'Login successful', 'success');
 			setTimeout(()=> window.location.href = '/student/dashboard', 300);
 		}else{
-			SA.showMsg(msg, data.message || 'Invalid credentials', false);
+			SA.showMsg(msg, data.message || 'Invalid credentials', 'error');
 		}
-	}catch(err){ SA.showMsg(msg, 'Network error', false); }
+	}catch(err){ SA.showMsg(msg, 'Network error', 'error'); }
 });
 
 
