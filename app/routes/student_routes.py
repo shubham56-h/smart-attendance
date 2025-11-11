@@ -55,7 +55,7 @@ def login_student():
     else:
         return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
-@student_bp.route("/profile", methods=["GET"])
+@student_bp.route("/api/profile", methods=["GET"])
 @jwt_required()
 def student_profile():
     current_user_id = int(get_jwt_identity())

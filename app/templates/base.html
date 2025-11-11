@@ -159,7 +159,7 @@
 				<!-- Profile badge (shown when logged in) -->
 				<div id="nav-profile" class="hidden relative">
 					<div class="flex items-center gap-2">
-						<div id="nav-profile-badge" class="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white grid place-items-center font-bold text-sm shadow-md cursor-pointer hover:scale-110 transition-transform duration-300">
+						<div id="nav-profile-badge" class="h-9 w-9 rounded-full text-white grid place-items-center font-bold text-sm shadow-md cursor-pointer hover:scale-110 transition-transform duration-300">
 						</div>
 					</div>
 					<!-- Dropdown Menu -->
@@ -221,10 +221,17 @@
 					dashboardUrl = '/faculty/dashboard';
 				}
 				
-				// Set first character of name
+				// Set first character of name and color based on role
 				if (profileBadge) {
 					profileBadge.textContent = userName.charAt(0).toUpperCase();
 					profileBadge.title = userName;
+					
+					// Set gradient color based on role
+					if (studentToken) {
+						profileBadge.className = 'h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 text-white grid place-items-center font-bold text-sm shadow-md cursor-pointer hover:scale-110 transition-transform duration-300';
+					} else if (facultyToken) {
+						profileBadge.className = 'h-9 w-9 rounded-full bg-gradient-to-br from-purple-600 to-purple-700 text-white grid place-items-center font-bold text-sm shadow-md cursor-pointer hover:scale-110 transition-transform duration-300';
+					}
 					
 					// Setup dropdown
 					const dropdown = document.getElementById('profile-dropdown');
@@ -287,6 +294,9 @@
 		document.addEventListener('DOMContentLoaded', updateNavbar);
 	</script>
 
+	<!-- Load API helper -->
+	<script src="{{ url_for('static', filename='js/shared/api.js') }}"></script>
+	
 	{% block scripts %}{% endblock %}
 </body>
 </html>

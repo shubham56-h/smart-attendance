@@ -1,73 +1,457 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-2xl mx-auto">
-	<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-		<!-- Header -->
-		<div class="bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-8 text-white">
-			<div class="flex items-center gap-4">
-				<div id="profile-avatar" class="h-20 w-20 rounded-full bg-white/20 backdrop-blur grid place-items-center font-bold text-3xl">
-				</div>
-				<div>
-					<h1 id="profile-name" class="text-2xl font-bold">Loading...</h1>
-					<p id="profile-role" class="text-blue-100">Faculty</p>
+<div class="profile-page">
+	<!-- Profile Header -->
+	<div class="profile-header faculty-header">
+		<div class="profile-avatar-section">
+			<div id="profile-avatar" class="profile-avatar-circle"></div>
+			<div class="profile-header-info">
+				<h1 id="profile-name">Loading...</h1>
+				<p id="profile-role">Faculty Member</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- Main Content -->
+	<div class="profile-content">
+		<!-- Personal Information Card -->
+		<div class="profile-card">
+			<div class="card-header">
+				<h2>👤 Faculty Information</h2>
+			</div>
+			<div class="card-body">
+				<div class="info-grid">
+					<div class="info-item">
+						<span class="info-label">Full Name</span>
+						<span class="info-value" id="info-name">-</span>
+					</div>
+					<div class="info-item">
+						<span class="info-label">Faculty ID</span>
+						<span class="info-value" id="info-id">-</span>
+					</div>
+					<div class="info-item">
+						<span class="info-label">Email</span>
+						<span class="info-value" id="info-email">-</span>
+					</div>
 				</div>
 			</div>
 		</div>
-		
-		<!-- Profile Info -->
-		<div class="p-6 space-y-4">
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<div class="space-y-1">
-					<label class="text-xs font-medium text-slate-500 uppercase">Full Name</label>
-					<p id="info-name" class="text-slate-900 font-medium">-</p>
-				</div>
-				<div class="space-y-1">
-					<label class="text-xs font-medium text-slate-500 uppercase">Email</label>
-					<p id="info-email" class="text-slate-900 font-medium">-</p>
-				</div>
-				<div class="space-y-1">
-					<label class="text-xs font-medium text-slate-500 uppercase">Mobile Number</label>
-					<p id="info-mobile" class="text-slate-900 font-medium">-</p>
+
+		<!-- Session Statistics Card -->
+		<div class="profile-card">
+			<div class="card-header">
+				<h2>📊 Session Statistics</h2>
+			</div>
+			<div class="card-body">
+				<div class="stats-grid">
+					<div class="stat-box stat-info">
+						<div class="stat-icon">📅</div>
+						<div class="stat-content">
+							<div class="stat-value" id="total-sessions">0</div>
+							<div class="stat-label">Total Sessions</div>
+						</div>
+					</div>
+					<div class="stat-box stat-success">
+						<div class="stat-icon">✅</div>
+						<div class="stat-content">
+							<div class="stat-value" id="active-sessions">0</div>
+							<div class="stat-label">Active Now</div>
+						</div>
+					</div>
+					<div class="stat-box stat-primary">
+						<div class="stat-icon">👥</div>
+						<div class="stat-content">
+							<div class="stat-value" id="total-attendance">0</div>
+							<div class="stat-label">Total Attendance</div>
+						</div>
+					</div>
+					<div class="stat-box stat-warning">
+						<div class="stat-icon">📈</div>
+						<div class="stat-content">
+							<div class="stat-value" id="avg-per-session">0</div>
+							<div class="stat-label">Avg per Session</div>
+						</div>
+					</div>
 				</div>
 			</div>
-			
-			<div class="pt-4 border-t border-slate-200 flex gap-3">
-				<a href="/faculty/dashboard" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors">
-					Back to Dashboard
-				</a>
-			</div>
+		</div>
+
+		<!-- Actions -->
+		<div class="profile-actions">
+			<button onclick="logout()" class="btn btn-danger">
+				<svg style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+				</svg>
+				Logout
+			</button>
 		</div>
 	</div>
 </div>
 
-<script>
-	async function loadProfile() {
-		try {
-			const res = await SA.apiFetch('faculty', '/faculty/profile', { method: 'GET' });
-			const data = await res.json();
-			
-			if (res.ok && data.status === 'success') {
-				const faculty = data.faculty;
-				
-				// Update avatar
-				document.getElementById('profile-avatar').textContent = faculty.full_name.charAt(0).toUpperCase();
-				
-				// Update header
-				document.getElementById('profile-name').textContent = faculty.full_name;
-				
-				// Update info fields
-				document.getElementById('info-name').textContent = faculty.full_name;
-				document.getElementById('info-email').textContent = faculty.email;
-				document.getElementById('info-mobile').textContent = faculty.mobile_number;
-			} else {
-				SA.showMsg(document.body, data.message || 'Failed to load profile', 'error');
-			}
-		} catch (err) {
-			console.error('Profile load error:', err);
-			SA.showMsg(document.body, 'Network error', 'error');
-		}
+<style>
+.profile-page {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 2rem 1rem;
+}
+
+.profile-header {
+	background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+	border-radius: 20px;
+	padding: 3rem 2rem;
+	margin-bottom: 2rem;
+	box-shadow: 0 10px 40px rgba(147, 51, 234, 0.3);
+	position: relative;
+	overflow: hidden;
+}
+
+.profile-header::before {
+	content: '';
+	position: absolute;
+	top: -50%;
+	right: -10%;
+	width: 300px;
+	height: 300px;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+	border-radius: 50%;
+}
+
+.profile-header::after {
+	content: '';
+	position: absolute;
+	bottom: -30%;
+	left: -5%;
+	width: 250px;
+	height: 250px;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+	border-radius: 50%;
+}
+
+.profile-avatar-section {
+	display: flex;
+	align-items: center;
+	gap: 2rem;
+	color: white;
+	position: relative;
+	z-index: 1;
+}
+
+.profile-avatar-circle {
+	width: 120px;
+	height: 120px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.25);
+	backdrop-filter: blur(10px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 3.5rem;
+	font-weight: 700;
+	border: 4px solid rgba(255, 255, 255, 0.5);
+	box-shadow: 0 8px 20px rgba(147, 51, 234, 0.3);
+	flex-shrink: 0;
+}
+
+.profile-header-info h1 {
+	margin: 0 0 0.5rem 0;
+	font-size: 2.5rem;
+	font-weight: 700;
+}
+
+.profile-header-info p {
+	margin: 0;
+	font-size: 1.2rem;
+	opacity: 0.9;
+}
+
+.profile-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.profile-card {
+	background: white;
+	border-radius: 16px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	overflow: hidden;
+	border: 1px solid #e5e7eb;
+}
+
+.card-header {
+	background: linear-gradient(to right, #f8f9fa, #ffffff);
+	padding: 1.5rem 2rem;
+	border-bottom: 2px solid #e5e7eb;
+}
+
+.card-header h2 {
+	margin: 0;
+	font-size: 1.4rem;
+	font-weight: 700;
+	color: #1f2937;
+}
+
+.card-body {
+	padding: 2rem;
+}
+
+.info-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 2rem;
+}
+
+.info-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.info-label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #6b7280;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.info-value {
+	font-size: 1.2rem;
+	font-weight: 600;
+	color: #111827;
+}
+
+.stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 1.5rem;
+}
+
+.stat-box {
+	background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+	border: 2px solid #e5e7eb;
+	border-radius: 16px;
+	padding: 2rem;
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.stat-box.stat-success {
+	border-color: #10b981;
+	background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+}
+
+.stat-box.stat-primary {
+	border-color: #3b82f6;
+	background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+}
+
+.stat-box.stat-info {
+	border-color: #8b5cf6;
+	background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
+}
+
+.stat-box.stat-warning {
+	border-color: #f59e0b;
+	background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.stat-icon {
+	font-size: 3rem;
+	flex-shrink: 0;
+}
+
+.stat-content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.stat-value {
+	font-size: 2.5rem;
+	font-weight: 800;
+	color: #111827;
+	line-height: 1;
+}
+
+.stat-label {
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: #6b7280;
+}
+
+.action-card {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	padding: 1.5rem;
+	background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+	border: 2px solid #e5e7eb;
+	border-radius: 12px;
+	text-decoration: none;
+	color: inherit;
+	transition: all 0.3s ease;
+}
+
+.action-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+	border-color: #667eea;
+}
+
+.action-icon {
+	font-size: 2.5rem;
+	flex-shrink: 0;
+}
+
+.action-text h3 {
+	margin: 0 0 0.25rem 0;
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: #111827;
+}
+
+.action-text p {
+	margin: 0;
+	font-size: 0.9rem;
+	color: #6b7280;
+}
+
+.profile-actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	margin-top: 1rem;
+}
+
+.btn {
+	padding: 0.875rem 2rem;
+	border-radius: 12px;
+	font-size: 1rem;
+	font-weight: 600;
+	border: none;
+	cursor: pointer;
+	transition: all 0.2s;
+	text-decoration: none;
+	display: inline-block;
+}
+
+.btn-secondary {
+	background: #6b7280;
+	color: white;
+}
+
+.btn-secondary:hover {
+	background: #4b5563;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.btn-danger {
+	background: #ef4444;
+	color: white;
+}
+
+.btn-danger:hover {
+	background: #dc2626;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+@media (max-width: 768px) {
+	.profile-header {
+		padding: 2rem 1.5rem;
 	}
 	
-	document.addEventListener('DOMContentLoaded', loadProfile);
+	.profile-avatar-section {
+		flex-direction: column;
+		text-align: center;
+		gap: 1.5rem;
+	}
+	
+	.profile-avatar-circle {
+		width: 100px;
+		height: 100px;
+		font-size: 3rem;
+	}
+	
+	.profile-header-info h1 {
+		font-size: 2rem;
+	}
+	
+	.info-grid, .stats-grid, .quick-actions-grid {
+		grid-template-columns: 1fr;
+	}
+	
+	.profile-actions {
+		flex-direction: column;
+	}
+	
+	.btn {
+		width: 100%;
+	}
+}
+</style>
+
+<script>
+async function loadProfile() {
+	try {
+		const res = await SA.apiFetch('faculty', '/faculty/api/profile', { method: 'GET', auth: true });
+		const data = await res.json();
+		
+		console.log('Profile API response:', data);
+		
+		if (res.ok && data.status === 'success') {
+			const faculty = data.faculty;
+			console.log('Faculty data:', faculty);
+			
+			// Update avatar
+			const initials = faculty.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+			document.getElementById('profile-avatar').textContent = initials;
+			
+			// Update header
+			document.getElementById('profile-name').textContent = faculty.full_name;
+			
+			// Update info fields
+			document.getElementById('info-name').textContent = faculty.full_name;
+			document.getElementById('info-id').textContent = faculty.id;
+			document.getElementById('info-email').textContent = faculty.email;
+			
+			// Load session stats
+			await loadSessionStats();
+		} else {
+			// If unauthorized, redirect to login
+			if (res.status === 401) {
+				window.location.href = '/faculty/login';
+			}
+		}
+	} catch (err) {
+		console.error('Profile load error:', err);
+	}
+}
+
+async function loadSessionStats() {
+	// This would call an API endpoint to get session statistics
+	// For now, showing placeholder values
+	document.getElementById('total-sessions').textContent = '0';
+	document.getElementById('active-sessions').textContent = '0';
+	document.getElementById('total-attendance').textContent = '0';
+	document.getElementById('avg-per-session').textContent = '0';
+}
+
+function logout() {
+	localStorage.removeItem('faculty_access_token');
+	localStorage.removeItem('faculty_refresh_token');
+	window.location.href = '/faculty/login';
+}
+
+document.addEventListener('DOMContentLoaded', loadProfile);
 </script>
 {% endblock %}

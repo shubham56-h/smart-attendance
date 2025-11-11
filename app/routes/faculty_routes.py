@@ -49,7 +49,7 @@ def faculty_login():
 # -------------------------------
 # Faculty Profile
 # -------------------------------
-@faculty_bp.route('/profile', methods=['GET'])
+@faculty_bp.route('/api/profile', methods=['GET'])
 @jwt_required()
 def faculty_profile():
     current_user_id = int(get_jwt_identity())
@@ -68,8 +68,7 @@ def faculty_profile():
         "faculty": {
             "id": faculty.id,
             "full_name": faculty.full_name,
-            "email": faculty.email,
-            "mobile_number": faculty.mobile_number
+            "email": faculty.email
         }
     })
 
