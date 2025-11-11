@@ -4,22 +4,63 @@ function getToken(role){
 	return localStorage.getItem(`${role}_access_token`) || '';
 }
 
+function getRefreshToken(role){
+	return localStorage.getItem(`${role}_refresh_token`) || '';
+}
+
 function setTokens(role, { access_token, refresh_token }){
 	if(access_token) localStorage.setItem(`${role}_access_token`, access_token);
 	if(refresh_token) localStorage.setItem(`${role}_refresh_token`, refresh_token);
 }
 
-async function apiFetch(role, path, { method = 'GET', body, auth = false } = {}){
+async function refreshAccessToken(role){
+	const refreshToken = getRefreshToken(role);
+	if(!refreshToken) return false;
+	
+	try {
+		const res = await fetch(`${API_BASE}/${role}/refresh`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${refreshToken}`
+			}
+		});
+		
+		if(res.ok){
+			const data = await res.json();
+			if(data.access_token){
+				localStorage.setItem(`${role}_access_token`, data.access_token);
+				return true;
+			}
+		}
+	} catch(e){
+		console.error('Token refresh failed:', e);
+	}
+	return false;
+}
+
+async function apiFetch(role, path, { method = 'GET', body, auth = false, _retry = false } = {}){
 	const headers = { 'Content-Type': 'application/json' };
 	if(auth){
 		const token = getToken(role);
 		if(token) headers['Authorization'] = `Bearer ${token}`;
 	}
+	
 	const res = await fetch(`${API_BASE}${path}`, {
 		method,
 		headers,
 		body: body ? JSON.stringify(body) : undefined
 	});
+	
+	// If 401 and we haven't retried yet, try to refresh token
+	if(res.status === 401 && auth && !_retry){
+		const refreshed = await refreshAccessToken(role);
+		if(refreshed){
+			// Retry the request with new token
+			return apiFetch(role, path, { method, body, auth, _retry: true });
+		}
+	}
+	
 	return res;
 }
 
