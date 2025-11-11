@@ -148,13 +148,14 @@ class SessionManager:
             if distance is None:
                 return None  # Failed to calculate distance
             
-            # Get allowed radius (default 100 meters, but can be adjusted based on accuracy)
-            allowed_radius = session.expected_location_radius or 100.0
+            # Get allowed radius (default 200 meters for better mobile GPS tolerance)
+            allowed_radius = session.expected_location_radius or 200.0
             
-            # Optionally add accuracy buffer if both locations have accuracy data
+            # Add accuracy buffer if both locations have accuracy data
             if session.faculty_location_accuracy and student_location.get('accuracy'):
                 accuracy_buffer = float(session.faculty_location_accuracy) + float(student_location.get('accuracy'))
-                allowed_radius = max(allowed_radius, accuracy_buffer)
+                # Use the larger of: base radius or accuracy buffer + 50m safety margin
+                allowed_radius = max(allowed_radius, accuracy_buffer + 50.0)
             
             if distance > allowed_radius:
                 return None  # Student too far from faculty location
