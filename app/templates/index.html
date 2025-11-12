@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+
 {% block content %}
+<div id="home-content" style="display: none;">
 	<!-- Hero Section - Mobile Optimized -->
 	<section class="text-center mb-8 md:mb-12 px-4">
 		<h1 class="text-3xl md:text-5xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight px-2">
@@ -174,19 +176,25 @@
 			<p>© 2025 Smart Attendance. All rights reserved. 💼</p>
 		</div>
 	</footer>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Redirect logged-in users to their dashboard
+// Check tokens and redirect BEFORE showing content
 (function() {
 	const studentToken = localStorage.getItem('student_access_token');
 	const facultyToken = localStorage.getItem('faculty_access_token');
 	
 	if (studentToken) {
-		window.location.href = '/student/dashboard';
+		// Redirect immediately without showing home page
+		window.location.replace('/student/dashboard');
 	} else if (facultyToken) {
-		window.location.href = '/faculty/dashboard';
+		// Redirect immediately without showing home page
+		window.location.replace('/faculty/dashboard');
+	} else {
+		// No token, show home page
+		document.getElementById('home-content').style.display = 'block';
 	}
 })();
 </script>
