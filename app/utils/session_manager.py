@@ -148,16 +148,25 @@ class SessionManager:
             if distance is None:
                 return None  # Failed to calculate distance
             
-            # Get allowed radius (default 200 meters for better mobile GPS tolerance)
-            allowed_radius = session.expected_location_radius or 200.0
+            # Get allowed radius (default 500 meters for mobile GPS tolerance)
+            # Mobile GPS can be very inaccurate, especially indoors or in urban areas
+            allowed_radius = session.expected_location_radius or 500.0
             
             # Add accuracy buffer if both locations have accuracy data
             if session.faculty_location_accuracy and student_location.get('accuracy'):
                 accuracy_buffer = float(session.faculty_location_accuracy) + float(student_location.get('accuracy'))
-                # Use the larger of: base radius or accuracy buffer + 50m safety margin
-                allowed_radius = max(allowed_radius, accuracy_buffer + 50.0)
+                # Use the larger of: base radius or accuracy buffer + 100m safety margin
+                allowed_radius = max(allowed_radius, accuracy_buffer + 100.0)
+            
+            # Log for debugging
+            import logging
+            logging.info(f"Distance check - Distance: {distance}m, Allowed: {allowed_radius}m, "
+                        f"Faculty: ({session.faculty_latitude}, {session.faculty_longitude}), "
+                        f"Student: ({student_location.get('latitude')}, {student_location.get('longitude')}), "
+                        f"Accuracies: F={session.faculty_location_accuracy}, S={student_location.get('accuracy')}")
             
             if distance > allowed_radius:
+                logging.warning(f"Location validation failed: {distance}m > {allowed_radius}m")
                 return None  # Student too far from faculty location
 
         # Create attendance record

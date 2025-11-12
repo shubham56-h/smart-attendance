@@ -75,6 +75,7 @@ document.getElementById('attendance-form')?.addEventListener('submit', async (e)
 	try{
 		// Get fresh location
 		const coords = await SA.getCurrentPosition();
+		console.log('Student location:', coords);
 		
 		// Get form data
 		const formData = new FormData(form);
@@ -86,6 +87,8 @@ document.getElementById('attendance-form')?.addEventListener('submit', async (e)
 			accuracy: coords.accuracy
 		};
 		
+		console.log('Submitting attendance:', body);
+		
 		// Submit attendance
 		const res = await SA.apiFetch('student', '/student/mark_attendance', { 
 			method: 'POST', 
@@ -96,9 +99,17 @@ document.getElementById('attendance-form')?.addEventListener('submit', async (e)
 		
 		if(res.ok){
 			SA.showMsg(msg, data.message || 'Attendance marked successfully!', 'success');
+			if(data.distance) {
+				console.log(`Distance from faculty: ${data.distance}m`);
+			}
 			form.reset();
 		}else{
+			console.error('Attendance failed:', data);
 			SA.showMsg(msg, data.message || 'Failed to mark attendance', 'error');
+			// Show debug info if available
+			if(data.debug) {
+				console.log('Debug info:', data.debug);
+			}
 		}
 	}catch(err){
 		SA.showMsg(msg, 'Error: ' + (err.message || 'Network error'), 'error');

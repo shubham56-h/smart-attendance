@@ -127,7 +127,18 @@ def mark_attendance():
     try:
         attendance = session_manager.validate_and_mark_attendance(otp, current_user_id, student_location)
         if not attendance:
-            return jsonify({"status": "error", "message": "Location validation failed"}), 403
+            # Log detailed info for debugging
+            import logging
+            logging.error(f"Location validation failed - Student: {student_location}, Session OTP: {otp}")
+            return jsonify({
+                "status": "error", 
+                "message": "Location validation failed. You may be too far from the faculty location.",
+                "debug": {
+                    "student_lat": student_location.get('latitude'),
+                    "student_lon": student_location.get('longitude'),
+                    "student_accuracy": student_location.get('accuracy')
+                }
+            }), 403
         return jsonify({
             "status": "success",
             "message": f"Attendance marked successfully for {attendance.subject}!",
@@ -136,4 +147,6 @@ def mark_attendance():
         })
     except Exception as e:
         db.session.rollback()
+        import logging
+        logging.error(f"Attendance marking error: {str(e)}")
         return jsonify({"status": "error", "message": f"Failed: {str(e)}"}), 500
