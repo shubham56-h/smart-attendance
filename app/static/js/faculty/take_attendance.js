@@ -124,6 +124,14 @@ if(startBtn){
 		try{
 			const coords = await SA.getCurrentPosition();
 			
+			// Check GPS accuracy before creating session
+			if(coords.accuracy > 200){
+				SA.showMsg(msg, `GPS accuracy too poor (${Math.round(coords.accuracy)}m). Please go outdoors or enable high-accuracy GPS.`, 'error');
+				btn.disabled = false;
+				btn.textContent = 'Start Session';
+				return;
+			}
+			
 			const res = await SA.apiFetch('faculty', '/faculty/start_session', { 
 				method: 'POST', 
 				body: { subject: subject, location: coords },
