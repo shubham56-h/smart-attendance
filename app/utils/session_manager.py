@@ -151,11 +151,11 @@ class SessionManager:
             if distance is None:
                 return None  # Failed to calculate distance
             
-            # Get allowed radius (minimum 2000 meters / 2km for mobile GPS tolerance)
+            # Get allowed radius (minimum 1000 meters / 1km for mobile GPS tolerance)
             # Mobile GPS can be very inaccurate, especially indoors, in urban areas, or different buildings
-            # This is generous to account for GPS drift, different devices, and indoor/outdoor differences
-            # Use the LARGER of: database value or 2000m default
-            allowed_radius = max(session.expected_location_radius or 0, 2000.0)
+            # This accounts for GPS drift, different devices, and indoor/outdoor differences
+            # Use the LARGER of: database value or 1000m default
+            allowed_radius = max(session.expected_location_radius or 0, 1000.0)
             
             # Add accuracy buffer if both locations have accuracy data
             if session.faculty_location_accuracy and student_location.get('accuracy'):
