@@ -133,6 +133,9 @@ class SessionManager:
         faculty_has_location = session.faculty_latitude is not None and session.faculty_longitude is not None
         student_has_location = student_location.get('latitude') is not None and student_location.get('longitude') is not None
 
+        import logging
+        logging.info(f"Faculty has location: {faculty_has_location}, Student has location: {student_has_location}")
+        
         if faculty_has_location:
             # If faculty has location, student must also provide location
             if not student_has_location:
@@ -148,9 +151,11 @@ class SessionManager:
             if distance is None:
                 return None  # Failed to calculate distance
             
-            # Get allowed radius (default 500 meters for mobile GPS tolerance)
-            # Mobile GPS can be very inaccurate, especially indoors or in urban areas
-            allowed_radius = session.expected_location_radius or 500.0
+            # Get allowed radius (minimum 2000 meters / 2km for mobile GPS tolerance)
+            # Mobile GPS can be very inaccurate, especially indoors, in urban areas, or different buildings
+            # This is generous to account for GPS drift, different devices, and indoor/outdoor differences
+            # Use the LARGER of: database value or 2000m default
+            allowed_radius = max(session.expected_location_radius or 0, 2000.0)
             
             # Add accuracy buffer if both locations have accuracy data
             if session.faculty_location_accuracy and student_location.get('accuracy'):
