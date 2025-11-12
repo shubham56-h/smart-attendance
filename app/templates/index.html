@@ -175,3 +175,19 @@
 		</div>
 	</footer>
 {% endblock %}
+
+{% block scripts %}
+<script>
+// Redirect logged-in users to their dashboard
+(function() {
+	const studentToken = localStorage.getItem('student_access_token');
+	const facultyToken = localStorage.getItem('faculty_access_token');
+	
+	if (studentToken) {
+		window.location.href = '/student/dashboard';
+	} else if (facultyToken) {
+		window.location.href = '/faculty/dashboard';
+	}
+})();
+</script>
+{% endblock %}
