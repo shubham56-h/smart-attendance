@@ -160,7 +160,7 @@ class SessionManager:
             # Mobile GPS can be very inaccurate, especially indoors, in urban areas, or different buildings
             # This accounts for GPS drift, different devices, and indoor/outdoor differences
             # Use the LARGER of: database value or 500m default
-            allowed_radius = max(session.expected_location_radius or 0, 500.0)
+            allowed_radius = max(session.expected_location_radius or 0, 700.0)
             
             # Add accuracy buffer if both locations have accuracy data
             if session.faculty_location_accuracy and student_location.get('accuracy'):
