@@ -349,6 +349,45 @@ def update_location():
     })
 
 # -----------------------------------------
+# 📋 Route: Recent Sessions
+# -----------------------------------------
+@faculty_bp.route('/recent_sessions', methods=['GET'])
+@jwt_required()
+def recent_sessions():
+    current_user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    if claims.get("type") != "faculty":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    from app.models import AttendanceSession
+    
+    # Get last 5 sessions for this faculty
+    sessions = AttendanceSession.query.filter_by(faculty_id=current_user_id)\
+        .order_by(AttendanceSession.created_at.desc())\
+        .limit(5)\
+        .all()
+    
+    session_data = []
+    for session in sessions:
+        # Count total students who marked attendance in this session
+        attendance_count = len(session.attendances) if session.attendances else 0
+        
+        session_data.append({
+            "session_code": session.session_code,
+            "subject": session.subject,
+            "created_at": session.created_at.isoformat() if session.created_at else None,
+            "closed_at": session.closed_at.isoformat() if session.closed_at else None,
+            "expires_at": session.expires_at.isoformat() if session.expires_at else None,
+            "status": session.status,
+            "total_students": attendance_count
+        })
+    
+    return jsonify({
+        "status": "success",
+        "sessions": session_data
+    })
+
+# -----------------------------------------
 # 📋 Route: List Faculty (for dropdowns)
 # -----------------------------------------
 @faculty_bp.route('/list', methods=['GET'])
