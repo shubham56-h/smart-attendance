@@ -186,6 +186,10 @@
 	const studentToken = localStorage.getItem('student_access_token');
 	const facultyToken = localStorage.getItem('faculty_access_token');
 	
+	// Hide base footer on home page initially
+	const baseFooter = document.getElementById('base-footer');
+	if (baseFooter) baseFooter.style.display = 'none';
+	
 	if (studentToken) {
 		// Redirect immediately without showing home page
 		window.location.replace('/student/dashboard');
@@ -193,7 +197,7 @@
 		// Redirect immediately without showing home page
 		window.location.replace('/faculty/dashboard');
 	} else {
-		// No token, show home page
+		// No token, show home page (footer is inside home-content)
 		document.getElementById('home-content').style.display = 'block';
 	}
 })();
