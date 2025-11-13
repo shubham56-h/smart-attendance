@@ -133,9 +133,6 @@ class SessionManager:
         faculty_has_location = session.faculty_latitude is not None and session.faculty_longitude is not None
         student_has_location = student_location.get('latitude') is not None and student_location.get('longitude') is not None
 
-        import logging
-        logging.info(f"Faculty has location: {faculty_has_location}, Student has location: {student_has_location}")
-        
         if faculty_has_location:
             # If faculty has location, student must also provide location
             if not student_has_location:
@@ -170,14 +167,9 @@ class SessionManager:
                 # Use the larger of: base radius or accuracy buffer + 100m safety margin
                 allowed_radius = max(allowed_radius, accuracy_buffer + 100.0)
             
-            # Log for debugging
-            import logging
-            logging.info(f"Distance check - Distance: {distance}m, Allowed: {allowed_radius}m, "
-                        f"Faculty: ({session.faculty_latitude}, {session.faculty_longitude}), "
-                        f"Student: ({student_location.get('latitude')}, {student_location.get('longitude')}), "
-                        f"Accuracies: F={session.faculty_location_accuracy}, S={student_location.get('accuracy')}")
-            
+            # Only log if validation fails (moved below)
             if distance > allowed_radius:
+                import logging
                 logging.warning(f"Location validation failed: {distance}m > {allowed_radius}m")
                 return None  # Student too far from faculty location
 

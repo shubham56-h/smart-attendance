@@ -522,11 +522,14 @@ def export_reports():
     status = request.args.get("status")
     fmt = (request.args.get("format") or "csv").strip().lower()
 
-    query = Attendance.query
+    # Start with base query and join Student once at the beginning
+    query = Attendance.query.join(Student, Attendance.student_id == Student.id)
+    
+    # Apply filters
     if faculty_id is not None:
-        query = query.filter_by(faculty_id=faculty_id)
+        query = query.filter(Attendance.faculty_id == faculty_id)
     if subject:
-        query = query.filter_by(subject=subject)
+        query = query.filter(Attendance.subject == subject)
     if start_date and end_date:
         try:
             sd = date_cls.fromisoformat(start_date)
@@ -538,14 +541,12 @@ def export_reports():
     elif date:
         query = query.filter(Attendance.date.like(f"%{date}%"))
     if division:
-        query = query.join(Student).filter(Student.division == division)
+        query = query.filter(Student.division == division)
     if faculty_name:
-        query = query.join(Faculty, Attendance.faculty).filter(Faculty.full_name.ilike(f"%{faculty_name}%"))
+        query = query.join(Faculty, Attendance.faculty_id == Faculty.id).filter(Faculty.full_name.ilike(f"%{faculty_name}%"))
     if status:
         query = query.filter(Attendance.status == status)
-
-    # Always join student to avoid N+1 when exporting
-    query = query.join(Student, Attendance.student_id == Student.id)
+    
     query = query.order_by(Attendance.date.desc())
     items = query.all()
 

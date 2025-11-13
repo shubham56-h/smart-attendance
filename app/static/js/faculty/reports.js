@@ -187,16 +187,28 @@ document.getElementById('report-download-csv')?.addEventListener('click', async 
     const params = new URLSearchParams(Object.fromEntries(formData.entries()));
     params.set('format', 'csv');
     try{
-        const res = await SA.apiFetch('faculty', `/faculty/export_reports?${params.toString()}`, { method: 'GET', auth: true });
+        const token = SA.getToken('faculty');
+        const res = await fetch(`${window.location.origin}/faculty/export_reports?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if(!res.ok){ 
+            alert('Failed to export CSV'); 
+            return; 
+        }
         const blob = await res.blob();
-        if(!res.ok){ alert('Failed to export CSV'); return; }
         const ts = new Date().toISOString().slice(0,10);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = `attendance-${ts}.csv`;
         document.body.appendChild(a); a.click();
         setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
-    }catch(err){ alert('Network error'); }
+    }catch(err){ 
+        console.error('CSV export error:', err);
+        alert('Network error'); 
+    }
 });
 
 document.getElementById('report-download-excel')?.addEventListener('click', async ()=>{
@@ -207,16 +219,28 @@ document.getElementById('report-download-excel')?.addEventListener('click', asyn
     const params = new URLSearchParams(Object.fromEntries(formData.entries()));
     params.set('format', 'excel');
     try{
-        const res = await SA.apiFetch('faculty', `/faculty/export_reports?${params.toString()}`, { method: 'GET', auth: true });
+        const token = SA.getToken('faculty');
+        const res = await fetch(`${window.location.origin}/faculty/export_reports?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if(!res.ok){ 
+            alert('Failed to export Excel'); 
+            return; 
+        }
         const blob = await res.blob();
-        if(!res.ok){ alert('Failed to export Excel'); return; }
         const ts = new Date().toISOString().slice(0,10);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = `attendance-${ts}.xls`;
         document.body.appendChild(a); a.click();
         setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
-    }catch(err){ alert('Network error'); }
+    }catch(err){ 
+        console.error('Excel export error:', err);
+        alert('Network error'); 
+    }
 });
 
 // Populate faculty dropdown on load

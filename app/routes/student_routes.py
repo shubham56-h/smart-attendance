@@ -127,10 +127,6 @@ def mark_attendance():
     try:
         attendance = session_manager.validate_and_mark_attendance(otp, current_user_id, student_location)
         if not attendance:
-            # Log detailed info for debugging
-            import logging
-            logging.error(f"Location validation failed - Student: {student_location}, Session OTP: {otp}")
-            
             # Check if it's an accuracy issue
             accuracy = student_location.get('accuracy')
             if accuracy and accuracy > 200:

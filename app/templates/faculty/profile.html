@@ -37,45 +37,6 @@
 			</div>
 		</div>
 
-		<!-- Session Statistics Card -->
-		<div class="profile-card">
-			<div class="card-header">
-				<h2>📊 Session Statistics</h2>
-			</div>
-			<div class="card-body">
-				<div class="stats-grid">
-					<div class="stat-box stat-info">
-						<div class="stat-icon">📅</div>
-						<div class="stat-content">
-							<div class="stat-value" id="total-sessions">0</div>
-							<div class="stat-label">Total Sessions</div>
-						</div>
-					</div>
-					<div class="stat-box stat-success">
-						<div class="stat-icon">✅</div>
-						<div class="stat-content">
-							<div class="stat-value" id="active-sessions">0</div>
-							<div class="stat-label">Active Now</div>
-						</div>
-					</div>
-					<div class="stat-box stat-primary">
-						<div class="stat-icon">👥</div>
-						<div class="stat-content">
-							<div class="stat-value" id="total-attendance">0</div>
-							<div class="stat-label">Total Attendance</div>
-						</div>
-					</div>
-					<div class="stat-box stat-warning">
-						<div class="stat-icon">📈</div>
-						<div class="stat-content">
-							<div class="stat-value" id="avg-per-session">0</div>
-							<div class="stat-label">Avg per Session</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<!-- Actions -->
 		<div class="profile-actions">
 			<button onclick="logout()" class="btn btn-danger">
@@ -423,9 +384,6 @@ async function loadProfile() {
 			document.getElementById('info-name').textContent = faculty.full_name;
 			document.getElementById('info-id').textContent = faculty.id;
 			document.getElementById('info-email').textContent = faculty.email;
-			
-			// Load session stats
-			await loadSessionStats();
 		} else {
 			// If unauthorized, redirect to login
 			if (res.status === 401) {
@@ -435,15 +393,6 @@ async function loadProfile() {
 	} catch (err) {
 		console.error('Profile load error:', err);
 	}
-}
-
-async function loadSessionStats() {
-	// This would call an API endpoint to get session statistics
-	// For now, showing placeholder values
-	document.getElementById('total-sessions').textContent = '0';
-	document.getElementById('active-sessions').textContent = '0';
-	document.getElementById('total-attendance').textContent = '0';
-	document.getElementById('avg-per-session').textContent = '0';
 }
 
 function logout() {
