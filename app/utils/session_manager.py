@@ -1,6 +1,4 @@
-import random
-import string
-import math
+import random, string, math
 from datetime import datetime, timedelta, timezone
 
 from app import db
@@ -8,20 +6,21 @@ from app.models import AttendanceSession, Attendance, Faculty
 
 
 def generate_otp(length=4):
-    """Generate a unique 4-digit OTP"""
+    """Generate a unique 4-digit OTP (unique among active sessions only)"""
     characters = string.digits
     while True:
         otp = ''.join(random.choice(characters) for _ in range(length))
-        # Check if OTP is unique
-        if not AttendanceSession.query.filter_by(otp=otp).first():
+        # Check if OTP is unique among active sessions only
+        if not AttendanceSession.query.filter_by(otp=otp, status='active').first():
             return otp
 
 
 def generate_session_code(length=10):
-    """Generate a unique session code"""
+    """Generate a globally unique session code (permanent identifier)"""
     characters = string.ascii_uppercase + string.digits
     while True:
         session_code = ''.join(random.choice(characters) for _ in range(length))
+        # Check if session code is globally unique (across all sessions, not just active)
         if not AttendanceSession.query.filter_by(session_code=session_code).first():
             return session_code
 
