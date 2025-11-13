@@ -139,10 +139,11 @@ class SessionManager:
                 logging.warning("Student location missing when faculty has location")
                 return None  # Student location required when faculty has location
             
-            # Check student GPS accuracy - reject if too poor (> 200m)
+            # Check student GPS accuracy - reject if too poor (> 150m)
             student_accuracy = student_location.get('accuracy')
-            if student_accuracy and student_accuracy > 200:
-                logging.warning(f"Student GPS accuracy too poor: {student_accuracy}m (max 200m)")
+            if student_accuracy and student_accuracy > 150:
+                import logging
+                logging.warning(f"Student GPS accuracy too poor: {student_accuracy}m (max 150m)")
                 return None  # GPS accuracy too poor, location unreliable
             
             distance = calculate_distance(
@@ -155,11 +156,11 @@ class SessionManager:
             if distance is None:
                 return None  # Failed to calculate distance
             
-            # Get allowed radius (minimum 700 meters for mobile GPS tolerance)
+            # Get allowed radius (minimum 500 meters for mobile GPS tolerance)
             # Mobile GPS can be very inaccurate, especially indoors, in urban areas, or different buildings
             # This accounts for GPS drift, different devices, and indoor/outdoor differences
-            # Use the LARGER of: database value or 700m default
-            allowed_radius = max(session.expected_location_radius or 0, 700.0)
+            # Use the LARGER of: database value or 500m default
+            allowed_radius = max(session.expected_location_radius or 0, 500.0)
             
             # Add accuracy buffer if both locations have accuracy data
             if session.faculty_location_accuracy and student_location.get('accuracy'):

@@ -5,6 +5,7 @@ from app.utils import hash_password, verify_password, generate_tokens
 from app.utils.session_manager import SessionManager
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, get_jwt
 from datetime import datetime, timezone
+import logging
 
 student_bp = Blueprint("student", __name__)
 session_manager = SessionManager()
@@ -129,13 +130,13 @@ def mark_attendance():
         if not attendance:
             # Check if it's an accuracy issue
             accuracy = student_location.get('accuracy')
-            if accuracy and accuracy > 200:
+            if accuracy and accuracy > 150:
                 return jsonify({
                     "status": "error", 
                     "message": f"GPS accuracy too poor ({int(accuracy)}m). Please go outdoors or enable high-accuracy GPS.",
                     "debug": {
                         "student_accuracy": accuracy,
-                        "max_allowed": 200
+                        "max_allowed": 150
                     }
                 }), 403
             
@@ -156,6 +157,5 @@ def mark_attendance():
         })
     except Exception as e:
         db.session.rollback()
-        import logging
         logging.error(f"Attendance marking error: {str(e)}")
         return jsonify({"status": "error", "message": f"Failed: {str(e)}"}), 500

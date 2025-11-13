@@ -125,14 +125,14 @@ def start_session():
     if not location_data.get("latitude") or not location_data.get("longitude"):
         return jsonify({"status": "error", "message": "Location data is required to start session"}), 400
     
-    # Check faculty GPS accuracy (must be < 200m)
+    # Check faculty GPS accuracy (must be < 150m)
     faculty_accuracy = location_data.get("accuracy")
-    if faculty_accuracy and faculty_accuracy > 200:
+    if faculty_accuracy and faculty_accuracy > 150:
         return jsonify({
             "status": "error", 
             "message": f"GPS accuracy too poor ({int(faculty_accuracy)}m). Please go outdoors or enable high-accuracy GPS.",
             "accuracy": faculty_accuracy,
-            "max_allowed": 200
+            "max_allowed": 150
         }), 400
 
     # Check if an active session already exists for this faculty
