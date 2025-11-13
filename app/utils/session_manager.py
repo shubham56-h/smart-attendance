@@ -211,52 +211,5 @@ class SessionManager:
         db.session.commit()
         return len(expired_sessions)
 
-    def delete_old_sessions(self, older_than_days: int = 7) -> int:
-        """Delete old sessions that are closed or expired"""
-        now = datetime.now(timezone.utc)
-        threshold_date = now - timedelta(days=older_than_days)
-
-        # Find sessions that are either closed or expired and are older than the threshold
-        old_sessions = AttendanceSession.query.filter(
-            AttendanceSession.status.in_(['closed', 'expired']),
-            AttendanceSession.expires_at < threshold_date
-        ).all()
-
-        deleted_count = 0
-        for session in old_sessions:
-            # Also delete associated attendance records to maintain data integrity
-            Attendance.query.filter_by(session_id=session.id).delete()
-            db.session.delete(session)
-            deleted_count += 1
-        db.session.commit()
-        return deleted_count
-
-    def get_session_statistics(self, faculty_id: int, start_date: datetime, end_date: datetime) -> dict:
-        """Get session statistics for a faculty member"""
-        total_sessions = AttendanceSession.query.filter(
-            AttendanceSession.faculty_id == faculty_id,
-            AttendanceSession.created_at >= start_date,
-            AttendanceSession.created_at <= end_date
-        ).count()
-
-        active_sessions = AttendanceSession.query.filter(
-            AttendanceSession.faculty_id == faculty_id,
-            AttendanceSession.status == 'active'
-        ).count()
-
-        total_attendance_records = db.session.query(Attendance).join(AttendanceSession).filter(
-            AttendanceSession.faculty_id == faculty_id,
-            Attendance.marked_at >= start_date,
-            Attendance.marked_at <= end_date
-        ).count()
-
-        # Calculate average students per session (avoid division by zero)
-        average_per_session = total_attendance_records / total_sessions if total_sessions else 0
-
-        return {
-            'total_sessions': total_sessions,
-            'active_sessions': active_sessions,
-            'total_attendance': total_attendance_records,
-            'average_per_session': round(average_per_session, 2)
-        }
+    # All sessions and attendance records are kept permanently for audit trails and analytics
 
