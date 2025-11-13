@@ -119,7 +119,7 @@ if(startBtn){
 		}
 		
 		btn.disabled = true;
-		btn.textContent = 'Starting...';
+		btn.innerHTML = '<span class="spinner"></span>Starting...';
 		
 		try{
 			const coords = await SA.getCurrentPosition();

@@ -70,7 +70,7 @@ document.getElementById('attendance-form')?.addEventListener('submit', async (e)
 	const msg = document.getElementById('attendance-msg');
 	
 	submitBtn.disabled = true;
-	submitBtn.textContent = 'Marking...';
+	submitBtn.innerHTML = '<span class="spinner"></span>Marking...';
 	
 	try{
 		// Get fresh location
@@ -98,7 +98,8 @@ document.getElementById('attendance-form')?.addEventListener('submit', async (e)
 		const data = await res.json();
 		
 		if(res.ok){
-			SA.showMsg(msg, data.message || 'Attendance marked successfully!', 'success');
+			// Show success animation
+			showSuccessAnimation(data.message || 'Attendance marked successfully!', data.distance);
 			if(data.distance) {
 				console.log(`Distance from faculty: ${data.distance}m`);
 			}
@@ -119,3 +120,35 @@ document.getElementById('attendance-form')?.addEventListener('submit', async (e)
 		submitBtn.textContent = 'Mark Attendance';
 	}
 });
+
+// Success animation modal
+function showSuccessAnimation(message, distance) {
+	const modal = document.createElement('div');
+	modal.className = 'success-modal';
+	modal.innerHTML = `
+		<div class="success-modal-content">
+			<div class="success-checkmark">
+				<div class="check-icon">
+					<span class="icon-line line-tip"></span>
+					<span class="icon-line line-long"></span>
+				</div>
+			</div>
+			<h2 style="margin-top: 1.5rem; font-size: 1.5rem; font-weight: 700; color: #10b981;">Success!</h2>
+			<p style="margin-top: 0.5rem; color: #6b7280;">${message}</p>
+			${distance ? `<p style="margin-top: 0.5rem; color: #6b7280; font-size: 0.875rem;">Distance: ${distance}m from faculty</p>` : ''}
+		</div>
+	`;
+	document.body.appendChild(modal);
+	
+	// Auto-close after 3 seconds
+	setTimeout(() => {
+		modal.style.opacity = '0';
+		setTimeout(() => modal.remove(), 300);
+	}, 3000);
+	
+	// Click to close
+	modal.addEventListener('click', () => {
+		modal.style.opacity = '0';
+		setTimeout(() => modal.remove(), 300);
+	});
+}
