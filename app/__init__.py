@@ -144,12 +144,10 @@ def create_app():
                 with app.app_context():
                     # Check if tables exist before trying to clean up
                     try:
-                        # Expire old sessions
+                        # Expire old sessions (status change only, no deletion)
                         expired_count = session_manager.expire_old_sessions()
-                        # Delete old closed/expired sessions (older than 7 days)
-                        deleted_count = session_manager.delete_old_sessions(older_than_days=7)
-                        if expired_count > 0 or deleted_count > 0:
-                            print(f"Session cleanup: Expired {expired_count} sessions, Deleted {deleted_count} old sessions")
+                        if expired_count > 0:
+                            print(f"Session cleanup: Expired {expired_count} sessions")
                     except OperationalError as e:
                         # Table doesn't exist yet or database not ready, skip this cycle
                         pass

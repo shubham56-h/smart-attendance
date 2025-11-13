@@ -211,5 +211,5 @@ class SessionManager:
         db.session.commit()
         return len(expired_sessions)
 
-    # All sessions and attendance records are kept permanently for audit trails and analytics
+    # Note: All sessions and attendance records are kept permanently for audit trails and analytics
 
