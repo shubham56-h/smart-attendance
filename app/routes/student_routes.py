@@ -122,9 +122,6 @@ def mark_attendance():
         return jsonify({"status": "error", "message": "OTP has expired"}), 400
     if session.subject != subject:
         return jsonify({"status": "error", "message": f"Subject mismatch. This OTP is for {session.subject}"}), 400
-    existing = Attendance.query.filter_by(session_id=session.id, student_id=current_user_id).first()
-    if existing:
-        return jsonify({"status": "error", "message": "Attendance already marked"}), 400
     
     # Check student GPS accuracy before processing (must be < 150m)
     student_accuracy = student_location.get("accuracy")
@@ -138,19 +135,19 @@ def mark_attendance():
     
     try:
         attendance = session_manager.validate_and_mark_attendance(otp, current_user_id, student_location)
-        if not attendance:
-            # Location validation failed (too far from faculty)
-            return jsonify({
-                "status": "error", 
-                "message": "Location validation failed. You may be too far from the faculty location."
-            }), 403
         return jsonify({
             "status": "success",
             "message": f"Attendance marked successfully for {attendance.subject}!",
             "subject": attendance.subject,
             "distance": round(attendance.distance_from_faculty, 2) if attendance.distance_from_faculty else None
         })
+    except ValueError as e:
+        # Specific validation errors with clear messages
+        return jsonify({
+            "status": "error", 
+            "message": str(e)
+        }), 400
     except Exception as e:
         db.session.rollback()
         logging.error(f"Attendance marking error: {str(e)}")
-        return jsonify({"status": "error", "message": f"Failed: {str(e)}"}), 500
+        return jsonify({"status": "error", "message": "Failed to mark attendance. Please try again."}), 500

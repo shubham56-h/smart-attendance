@@ -113,11 +113,15 @@ class SessionManager:
         return session
 
     def validate_and_mark_attendance(self, otp: str, student_id: int, student_location: dict):
-        """Validate OTP and location, then mark attendance"""
+        """Validate OTP and location, then mark attendance
+        
+        Raises:
+            ValueError: With specific error message for different failure cases
+        """
         session = self.get_session_by_otp(otp)
 
         if not session:
-            return None  # Session not found or expired
+            raise ValueError("Invalid or expired OTP")
 
         # Check if student already marked attendance for this session
         existing_attendance = Attendance.query.filter_by(
@@ -125,7 +129,7 @@ class SessionManager:
             student_id=student_id
         ).first()
         if existing_attendance:
-            return None  # Attendance already marked
+            raise ValueError("Attendance already marked for this session")
 
         # Validate location if faculty location is available
         distance = None
@@ -135,8 +139,7 @@ class SessionManager:
         if faculty_has_location:
             # If faculty has location, student must also provide location
             if not student_has_location:
-                logging.warning("Student location missing when faculty has location")
-                return None  # Student location required when faculty has location
+                raise ValueError("Location data is required to mark attendance")
             
             distance = calculate_distance(
                 session.faculty_latitude,
@@ -146,7 +149,7 @@ class SessionManager:
             )
 
             if distance is None:
-                return None  # Failed to calculate distance
+                raise ValueError("Failed to calculate distance from faculty location")
             
             # Get allowed radius (minimum 500 meters for mobile GPS tolerance)
             # Mobile GPS can be very inaccurate, especially indoors, in urban areas, or different buildings
@@ -160,11 +163,9 @@ class SessionManager:
                 # Use the larger of: base radius or accuracy buffer + 100m safety margin
                 allowed_radius = max(allowed_radius, accuracy_buffer + 100.0)
             
-            # Only log if validation fails (moved below)
+            # Check if student is within allowed radius
             if distance > allowed_radius:
-                import logging
-                logging.warning(f"Location validation failed: {distance}m > {allowed_radius}m")
-                return None  # Student too far from faculty location
+                raise ValueError(f"You are too far from the faculty location ({int(distance)}m away, maximum {int(allowed_radius)}m allowed)")
 
         # Create attendance record
         attendance = Attendance(
