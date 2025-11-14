@@ -134,7 +134,8 @@ def mark_attendance():
         }), 400
     
     try:
-        attendance = session_manager.validate_and_mark_attendance(otp, current_user_id, student_location)
+        # Pass session object instead of OTP to avoid duplicate lookup
+        attendance = session_manager.validate_and_mark_attendance(session, current_user_id, student_location)
         return jsonify({
             "status": "success",
             "message": f"Attendance marked successfully for {attendance.subject}!",

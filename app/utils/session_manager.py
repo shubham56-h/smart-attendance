@@ -112,16 +112,19 @@ class SessionManager:
         
         return session
 
-    def validate_and_mark_attendance(self, otp: str, student_id: int, student_location: dict):
-        """Validate OTP and location, then mark attendance
+    def validate_and_mark_attendance(self, session, student_id: int, student_location: dict):
+        """Validate location and mark attendance for a given session
+        
+        Args:
+            session: AttendanceSession object (already validated)
+            student_id: ID of the student marking attendance
+            student_location: Dict with latitude, longitude, accuracy
         
         Raises:
             ValueError: With specific error message for different failure cases
         """
-        session = self.get_session_by_otp(otp)
-
         if not session:
-            raise ValueError("Invalid or expired OTP")
+            raise ValueError("Invalid session")
 
         # Check if student already marked attendance for this session
         existing_attendance = Attendance.query.filter_by(
