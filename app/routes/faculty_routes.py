@@ -263,15 +263,35 @@ def recent_sessions():
         # Count total students who marked attendance in this session
         attendance_count = len(session.attendances) if session.attendances else 0
         
+        # Ensure timezone-aware datetimes for proper frontend parsing
+        created_at = session.created_at
+        if created_at and created_at.tzinfo is None:
+            from datetime import timezone as tz
+            created_at = created_at.replace(tzinfo=tz.utc)
+        
+        closed_at = session.closed_at
+        if closed_at and closed_at.tzinfo is None:
+            from datetime import timezone as tz
+            closed_at = closed_at.replace(tzinfo=tz.utc)
+        
+        expires_at = session.expires_at
+        if expires_at and expires_at.tzinfo is None:
+            from datetime import timezone as tz
+            expires_at = expires_at.replace(tzinfo=tz.utc)
+        
         session_data.append({
             "session_code": session.session_code,
             "subject": session.subject,
-            "created_at": session.created_at.isoformat() if session.created_at else None,
-            "closed_at": session.closed_at.isoformat() if session.closed_at else None,
-            "expires_at": session.expires_at.isoformat() if session.expires_at else None,
+            "created_at": created_at.isoformat() if created_at else None,
+            "closed_at": closed_at.isoformat() if closed_at else None,
+            "expires_at": expires_at.isoformat() if expires_at else None,
             "status": session.status,
             "total_students": attendance_count
         })
+    
+    # Debug: log first session timestamp if exists
+    if session_data:
+        print(f"DEBUG: First session created_at: {session_data[0]['created_at']}")
     
     return jsonify({
         "status": "success",

@@ -42,6 +42,13 @@ async function loadRecentSessions() {
         if (res.ok && data.sessions && data.sessions.length > 0) {
             tbody.innerHTML = '';
             
+            // Debug: log first session timestamp
+            if (data.sessions[0]) {
+                console.log('DEBUG: First session created_at from API:', data.sessions[0].created_at);
+                console.log('DEBUG: Parsed date:', new Date(data.sessions[0].created_at));
+                console.log('DEBUG: Current time:', new Date());
+            }
+            
             for (const session of data.sessions) {
                 const tr = document.createElement('tr');
                 tr.className = 'border-t border-slate-100 hover:bg-slate-50 transition-colors';
