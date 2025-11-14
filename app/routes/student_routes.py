@@ -125,29 +125,24 @@ def mark_attendance():
     existing = Attendance.query.filter_by(session_id=session.id, student_id=current_user_id).first()
     if existing:
         return jsonify({"status": "error", "message": "Attendance already marked"}), 400
+    
+    # Check student GPS accuracy before processing (must be < 150m)
+    student_accuracy = student_location.get("accuracy")
+    if student_accuracy and student_accuracy > 150:
+        return jsonify({
+            "status": "error", 
+            "message": f"GPS accuracy too poor ({int(student_accuracy)}m). Please go outdoors or enable high-accuracy GPS.",
+            "accuracy": student_accuracy,
+            "max_allowed": 150
+        }), 400
+    
     try:
         attendance = session_manager.validate_and_mark_attendance(otp, current_user_id, student_location)
         if not attendance:
-            # Check if it's an accuracy issue
-            accuracy = student_location.get('accuracy')
-            if accuracy and accuracy > 150:
-                return jsonify({
-                    "status": "error", 
-                    "message": f"GPS accuracy too poor ({int(accuracy)}m). Please go outdoors or enable high-accuracy GPS.",
-                    "debug": {
-                        "student_accuracy": accuracy,
-                        "max_allowed": 150
-                    }
-                }), 403
-            
+            # Location validation failed (too far from faculty)
             return jsonify({
                 "status": "error", 
-                "message": "Location validation failed. You may be too far from the faculty location.",
-                "debug": {
-                    "student_lat": student_location.get('latitude'),
-                    "student_lon": student_location.get('longitude'),
-                    "student_accuracy": student_location.get('accuracy')
-                }
+                "message": "Location validation failed. You may be too far from the faculty location."
             }), 403
         return jsonify({
             "status": "success",

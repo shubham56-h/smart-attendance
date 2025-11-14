@@ -112,7 +112,7 @@ class SessionManager:
         
         return session
 
-    def validate_and_mark_attendance(self, otp: str, student_id: int, student_location: dict) -> Attendance | None:
+    def validate_and_mark_attendance(self, otp: str, student_id: int, student_location: dict):
         """Validate OTP and location, then mark attendance"""
         session = self.get_session_by_otp(otp)
 
@@ -137,13 +137,6 @@ class SessionManager:
             if not student_has_location:
                 logging.warning("Student location missing when faculty has location")
                 return None  # Student location required when faculty has location
-            
-            # Check student GPS accuracy - reject if too poor (> 150m)
-            student_accuracy = student_location.get('accuracy')
-            if student_accuracy and student_accuracy > 150:
-                import logging
-                logging.warning(f"Student GPS accuracy too poor: {student_accuracy}m (max 150m)")
-                return None  # GPS accuracy too poor, location unreliable
             
             distance = calculate_distance(
                 session.faculty_latitude,
