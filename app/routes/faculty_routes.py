@@ -170,58 +170,6 @@ def start_session():
         'expires_at': expires_at.isoformat()
     })
 
-# -------------------------------
-# Generate OTP (Legacy endpoint - kept for compatibility)
-# -------------------------------
-@faculty_bp.route('/generate_otp', methods=['POST'])
-@jwt_required()
-def generate_otp():
-    # Get faculty ID from JWT token
-    current_user_id = int(get_jwt_identity())
-    claims = get_jwt()
-    
-    # Verify it's a faculty token
-    if claims.get("type") != "faculty":
-        return jsonify({"status": "error", "message": "Unauthorized"}), 403
-    
-    faculty_id = current_user_id
-    
-    # Get subject and optional location data from request body
-    data = request.get_json() or {}
-    subject = data.get("subject", "").strip()
-    location_data = data.get("location", {})
-    expires_in_minutes = data.get("expires_in_minutes", 5)  # Default to 5 minutes
-    
-    if not subject:
-        return jsonify({"status": "error", "message": "Subject is required to generate OTP"}), 400
-
-    # Check if an active session already exists for this faculty
-    existing_session = session_manager.get_active_session(faculty_id)
-    if existing_session:
-        # Optionally close the old session or return it
-        return jsonify({
-            'status': 'error',
-            'message': 'An active session already exists for this faculty.',
-            'otp': existing_session.otp,
-            'subject': existing_session.subject,
-            'expires_at': existing_session.expires_at.isoformat()
-        }), 409  # Conflict
-
-    # Create a new session using the SessionManager
-    try:
-        session = session_manager.create_session(faculty_id, subject, location_data, expires_in_minutes)
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"status": "error", "message": f"Failed to create session: {str(e)}"}), 500
-
-    return jsonify({
-        'status': 'success',
-        'otp': session.otp,
-        'session_code': session.session_code,
-        'subject': session.subject,
-        'expires_at': session.expires_at.isoformat()
-    })
-
 
 # -------------------------------
 # Get Active Session
@@ -290,63 +238,6 @@ def close_session():
         return jsonify({"status": "success", "message": "Session closed successfully"})
     else:
         return jsonify({"status": "error", "message": "Failed to close session"}), 500
-
-# -------------------------------
-# Update Live Location
-# -------------------------------
-@faculty_bp.route('/update_location', methods=['POST'])
-@jwt_required()
-def update_location():
-    # Get faculty ID from JWT token
-    current_user_id = int(get_jwt_identity())
-    claims = get_jwt()
-    
-    # Verify it's a faculty token
-    if claims.get("type") != "faculty":
-        return jsonify({"status": "error", "message": "Unauthorized"}), 403
-    
-    data = request.get_json() or {}
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
-    accuracy = data.get('accuracy')
-
-    if latitude is None or longitude is None:
-        return jsonify({'status': 'error', 'message': 'Missing location data'}), 400
-
-    try:
-        lat_val = float(latitude)
-        lon_val = float(longitude)
-    except (TypeError, ValueError):
-        return jsonify({'status': 'error', 'message': 'Invalid location format'}), 400
-
-    accuracy_val = None
-    if accuracy is not None:
-        try:
-            accuracy_val = float(accuracy)
-        except (TypeError, ValueError):
-            accuracy_val = None
-
-    # Find the active session for this faculty and update its location
-    active_session = session_manager.get_active_session(current_user_id)
-
-    if not active_session:
-        return jsonify({"status": "error", "message": "No active session found for this faculty."}), 404
-
-    active_session.faculty_latitude = lat_val
-    active_session.faculty_longitude = lon_val
-    active_session.faculty_location_accuracy = accuracy_val
-    active_session.faculty_location_timestamp = datetime.now(timezone.utc)
-
-    db.session.commit()
-
-    return jsonify({
-        'status': 'success',
-        'message': 'Location updated successfully',
-        'latitude': lat_val,
-        'longitude': lon_val,
-        'accuracy': accuracy_val,
-        'timestamp': active_session.faculty_location_timestamp.isoformat()
-    })
 
 # -----------------------------------------
 # 📋 Route: Recent Sessions
@@ -667,11 +558,6 @@ def delete_attendance(attendance_id: int):
     record = Attendance.query.get(attendance_id)
     if not record:
         return jsonify({"status": "error", "message": "Record not found"}), 404
-
-    # Optional: restrict deletion to the same faculty who marked it
-    # current_user_id = int(get_jwt_identity())
-    # if record.faculty_id and record.faculty_id != current_user_id:
-    #     return jsonify({"status": "error", "message": "Forbidden"}), 403
 
     db.session.delete(record)
     db.session.commit()
