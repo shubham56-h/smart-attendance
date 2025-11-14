@@ -16,6 +16,12 @@ class Student(db.Model):
     mobile_number = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    
+    # Indexes for performance
+    __table_args__ = (
+        db.Index('idx_roll_number', 'roll_number'),  # For login lookups
+        db.Index('idx_division', 'division'),        # For division filtering
+    )
 
 
 class Attendance(db.Model):
@@ -38,6 +44,15 @@ class Attendance(db.Model):
     
     student = db.relationship('Student', backref='attendances', lazy=True)
     faculty = db.relationship('Faculty', backref='attendances', lazy=True)
+    
+    # Indexes for performance
+    __table_args__ = (
+        db.Index('idx_student_id', 'student_id'),           # For student attendance history
+        db.Index('idx_faculty_id', 'faculty_id'),           # For faculty reports
+        db.Index('idx_date', 'date'),                       # For date-based filtering
+        db.Index('idx_session_student', 'session_id', 'student_id'),  # For duplicate check
+        db.Index('idx_faculty_date', 'faculty_id', 'date'), # For faculty daily reports
+    )
 
 
 class AttendanceSession(db.Model):
