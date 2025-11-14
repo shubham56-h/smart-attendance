@@ -2,19 +2,29 @@ SAAuth.ensureAuthenticated('faculty', '/faculty/login');
 
 document.getElementById('faculty-logout')?.addEventListener('click', ()=> SAAuth.logout('faculty', '/faculty/login'));
 
-// Format datetime to readable format
+// Format datetime to readable format with precise timing for recent events
 function formatDateTime(isoString) {
     if (!isoString) return 'N/A';
     const date = new Date(isoString);
     const now = new Date();
     const diffMs = now - date;
+    const diffSecs = Math.floor(diffMs / 1000);
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
     
-    if (diffMins < 1) return 'Just now';
+    // More precise for recent times
+    if (diffSecs < 10) return 'Just now';
+    if (diffSecs < 60) return `${diffSecs}s ago`;
     if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffHours < 24) {
+        // Show hours and minutes for better precision
+        const remainingMins = diffMins % 60;
+        if (remainingMins > 0) {
+            return `${diffHours}h ${remainingMins}m ago`;
+        }
+        return `${diffHours}h ago`;
+    }
     if (diffDays < 7) return `${diffDays}d ago`;
     
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
