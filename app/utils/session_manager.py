@@ -51,6 +51,7 @@ class SessionManager:
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes)
 
         # Create new session
+        now = datetime.now(timezone.utc)
         session = AttendanceSession(
             session_code=session_code,
             otp=otp,
@@ -59,7 +60,8 @@ class SessionManager:
             faculty_latitude=location_data.get('latitude'),
             faculty_longitude=location_data.get('longitude'),
             faculty_location_accuracy=location_data.get('accuracy'),
-            faculty_location_timestamp=datetime.now(timezone.utc) if location_data.get('latitude') else None,
+            faculty_location_timestamp=now if location_data.get('latitude') else None,
+            created_at=now,  # Explicitly set created_at
             expires_at=expires_at
         )
         db.session.add(session)

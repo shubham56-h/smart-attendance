@@ -65,10 +65,20 @@ async function loadRecentSessions() {
                     statusClass += ' bg-red-100 text-red-700';
                 }
                 
+                // Debug: show both relative and absolute time
+                const createdDate = new Date(session.created_at);
+                const relativeTime = formatDateTime(session.created_at);
+                const absoluteTime = createdDate.toLocaleString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
                 tr.innerHTML = `
                     <td class="py-3 pl-4 pr-4 font-mono text-xs">${session.session_code}</td>
                     <td class="py-3 pr-4 font-semibold">${session.subject}</td>
-                    <td class="py-3 pr-4 text-slate-600">${formatDateTime(session.created_at)}</td>
+                    <td class="py-3 pr-4 text-slate-600" title="${absoluteTime}">${relativeTime}</td>
                     <td class="py-3 pr-4"><span class="${statusClass}">${session.status}</span></td>
                     <td class="py-3 pr-4 font-semibold text-purple-600">${session.total_students}</td>
                 `;

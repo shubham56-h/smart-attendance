@@ -74,7 +74,7 @@ class AttendanceSession(db.Model):
     
     # Session Status & Timing
     status = db.Column(db.String(20), nullable=False, default='active')  # active, expired, closed, cancelled
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     closed_at = db.Column(db.DateTime(timezone=True), nullable=True)
     

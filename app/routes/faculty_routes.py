@@ -252,9 +252,13 @@ def recent_sessions():
     
     from app.models import AttendanceSession
     
-    # Get last 5 sessions for this faculty
-    sessions = AttendanceSession.query.filter_by(faculty_id=current_user_id)\
-        .order_by(AttendanceSession.created_at.desc())\
+    # Get last 5 sessions for this faculty (from last 7 days only)
+    from datetime import timedelta
+    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    sessions = AttendanceSession.query.filter(
+        AttendanceSession.faculty_id == current_user_id,
+        AttendanceSession.created_at >= seven_days_ago
+    ).order_by(AttendanceSession.created_at.desc())\
         .limit(5)\
         .all()
     
