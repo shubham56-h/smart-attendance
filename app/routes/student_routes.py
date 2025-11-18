@@ -114,12 +114,9 @@ def mark_attendance():
     student_location = {"latitude": latitude, "longitude": longitude, "accuracy": data.get("accuracy")}
     session = session_manager.get_session_by_otp(otp)
     if not session:
-        return jsonify({"status": "error", "message": "Invalid OTP"}), 400
-    expires_at = session.expires_at
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
-    if expires_at < datetime.now(timezone.utc):
-        return jsonify({"status": "error", "message": "OTP has expired"}), 400
+        return jsonify({"status": "error", "message": "Invalid or expired OTP"}), 400
+    
+    # Subject validation for better UX (helps students catch mistakes)
     if session.subject != subject:
         return jsonify({"status": "error", "message": f"Subject mismatch. This OTP is for {session.subject}"}), 400
     

@@ -420,12 +420,17 @@ def view_reports():
     # Total before pagination
     total = query.count()
 
-    # Pagination
-    items = query.offset((page - 1) * size).limit(size).all()
+    # Pagination with eager loading to avoid N+1 queries
+    from sqlalchemy.orm import joinedload
+    items = query.options(
+        joinedload(Attendance.student),
+        joinedload(Attendance.faculty)
+    ).offset((page - 1) * size).limit(size).all()
 
     report_data = []
     for record in items:
-        student = Student.query.get(record.student_id)
+        # No additional query needed - student and faculty are already loaded
+        student = record.student
         faculty_name = record.faculty.full_name if record.faculty else "N/A"
         report_data.append({
             "id": record.id,
@@ -501,7 +506,12 @@ def export_reports():
     if status:
         query = query.filter(Attendance.status == status)
     
-    query = query.order_by(Attendance.date.desc())
+    # Eager load relationships to avoid N+1 queries during export
+    from sqlalchemy.orm import joinedload
+    query = query.options(
+        joinedload(Attendance.student),
+        joinedload(Attendance.faculty)
+    ).order_by(Attendance.date.desc())
     items = query.all()
 
     headers = ["Student", "Roll", "Division", "Faculty", "Subject", "Date", "Status"]
@@ -510,7 +520,7 @@ def export_reports():
         # Simple HTML table (Excel-compatible)
         rows_html = []
         for record in items:
-            student = record.student or Student.query.get(record.student_id)
+            student = record.student  # Already loaded, no additional query
             rows_html.append(
                 "<tr>" +
                 f"<td>{(student.full_name if student else '')}</td>" +
@@ -547,7 +557,7 @@ def export_reports():
     writer = csv.writer(output)
     writer.writerow(headers)
     for record in items:
-        student = record.student or Student.query.get(record.student_id)
+        student = record.student  # Already loaded, no additional query
         writer.writerow([
             (student.full_name if student else ''),
             (student.roll_number if student else ''),
